@@ -14,7 +14,7 @@ The service deployed consist of :
 
 In this repository you will not find a client container which is supposed to be external to the system.
 
-![Simple Cache](/images/Simple_Cache)
+![Simple Cache](/images/Simple_Cache.png)
 Format: ![Alt Text](url)
 
 
