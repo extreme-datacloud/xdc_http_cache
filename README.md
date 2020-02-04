@@ -14,11 +14,8 @@ The service deployed consist of :
 
 In this repository you will not find a client container which is supposed to be external to the system.
 
-```mermaid
-graph TD;
-  client-->cache;
-  cache-->se;
-```
+![Simple Cache](images/Simple_Cache)
+Format: ![Alt Text](url)
 
 
 # Usage
