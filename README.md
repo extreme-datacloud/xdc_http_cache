@@ -27,45 +27,6 @@ To start the containers just run:
 ```
 docker-compose -f docker-compose.yml up
 ```
-When the start-up phase is complete you should see:
-```
-
-docker ps
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                   NAMES
-90b916e84aff        centos              "sleep infinity"         3 hours ago         Up 8 seconds                                httpstoragedemo_client_1
-85ebf1f203c7        storm2/ngx-voms     "/tini -- /home/buil…"   5 hours ago         Up 10 seconds       0.0.0.0:9443->443/tcp   httpstoragedemo_cache_1
-69afe57da3a2        storm2/ngx-voms     "/tini -- /home/buil…"   5 hours ago         Up 11 seconds       0.0.0.0:8443->443/tcp   httpstoragedemo_se_1
-```
-
-The ``se`` container starts with an empty storage folder, which should be populated before starting the tests. The storage area inside the container is located at
-``/data/nginx/www``, so you should first execute ``/bin/bash`` inside the ``se`` container:
-
-```
-docker exec -it <se container id> /bin/bash
-[root@se /]# echo "test" >> /data/nginx/www/test.txt
-```
-
-The you can download the file from the client contacting the ``cache``:
-```
-docker exec -it <client container id> /bin/bash  
-curl https://cache.example/test.txt --cert /certs/client.cert.pem --capath /etc/pki/ --cacert /etc/pki/igi-test-ca.pem
-```
-Verify certs against CA
-```
-openssl  verify -verbose -allow_proxy_certs -CAfile <(cat ../trust-anchors/igi-test-ca.pem  test0.cert.pem)  3.cert.pem
-
-openssl  verify -allow_proxy_certs -verbose  -verify_depth 2 -untrusted  /certs/3.cert.pem  -CAfile /etc/pki/igi-test-ca.pem /certs/3.pem
-```
-[Repo certs][https://baltig.infn.it/storm2/ngx_http_voms_module/tree/master/t/certs]
-
-```
-VOMS_CLIENTS_JAVA_OPTIONS="-Dvoms.fake.vo=client-voms -Dvoms.fake=true -Dvoms.fake.aaCert=/certs/client.cert.pem -Dvoms.fake.aaKey=/certs/client.key.pem -Dvoms.fake.notAfter=<2019-08-30T00:00:00 -Dvoms.fake.notBefore=2019-08-06T00:00:00 -Dvoms.fake.gas=<name>=<value>,<name>=<value> -Dvoms.fake.fqans=/client-voms/client-voms/Role=prod -Dvoms.fake.serial=9999" voms-proxy-init -voms test.vo -cert /certs/tes0.p12 --valid 12:00 --vomsdir /vomsdir --certdir /etc/pki/
-```
-Retrieve key and cert from voms proxy
-```
-awk '/BEGIN RSA PRIVATE KEY/,/END RSA PRIVATE KEY/' <name>.pem > <name>.key.pem
-awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' <name>.pem > <name>.cert.pem
-```
 Examples of curl
 ```
 curl -v https://cache.example --cert /certs/3.cert.pem  --key /certs/3.key.pem --capath /etc/pki/ --cacert /certs/3.cert.pem
