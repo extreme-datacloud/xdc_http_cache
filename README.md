@@ -12,17 +12,24 @@ The service deployed consist of :
   - cache (the caching server you actually contact)
   - federation server
 
-In this repository you will not find a client container which is supposed to be external to the system.
+In this repository you will not find a client container which is supposed to be external to the deployment. A simple concept of what a cache can do is depicted in th following diagram. The contact the caching service instead of the
 
 ![Simple Cache](/images/Simple_Cache.png)
-Format: ![Alt Text](url)
 
+In the context of this work the client will authenticate to the storage element using proxy certificate augmented with VOMS Attribute Certificates. The role of the cache will be played by an nginx instance with an additional module for VOMS attribute support developed on purpose.
 
-# Usage
+![Simple Cache](/images/Simple_Cache_VOMS_Enabled.png)
 
-To start the containers just run:
+The code for the module can be found here:
+![Nginx voms module][https://baltig.infn.it/storm2/ngx_http_voms_module/blob/master/src/ngx_http_voms_module.cpp]
+
+The deployment described in this repository are based on docker-compose and in particular on an nginx image based on openresty already compiled against the additional module.
+
+# Simple cache deployment
+
+The first deployment consists of a basic container with the relevant certificates installed an nginx for the cache another nginx acting as storage element. It can be started issuing this command:
 ```
-docker-compose -f docker-compose.yml up
+docker-compose -f docker-compose-voms.yml up
 ```
 Examples of curl
 ```
