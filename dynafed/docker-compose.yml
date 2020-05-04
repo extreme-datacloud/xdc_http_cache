@@ -1,0 +1,37 @@
+version: "3.5"
+
+services:
+  dynafed:
+    hostname: dynafed.local
+    dns_search: 127.0.0.11
+    build:
+      context: .
+      dockerfile: assets/Dockerfile
+    environment:
+      TZ: UTC
+    volumes:
+      - ./assets/certs:/digicert
+      - ./assets/ssl.conf:/etc/httpd/conf.d/ssl.conf
+      - ./assets/httpd.conf:/etc/httpd/conf/httpd.conf
+      - ./assets/ugr.conf:/etc/ugr/ugr.conf
+      - ./assets/ugrdmlite.conf:/etc/ugr/ugrdmlite.conf
+      - ./assets/zlcgdm-ugr-dav.conf:/etc/httpd/conf.d/zlcgdm-ugr-dav.conf
+      - ./assets/endpoints.conf:/etc/ugr/conf.d/endpoints.conf
+      - ./assets/test_gridmapfile.py:/root/test_gridmapfile.py
+      - ./assets/accessfile:/etc/grid-security/accessfile
+      - ./assets/grid-mapfile:/etc/grid-security/grid-mapfile
+      - ./assets/vomsdir:/etc/grid-security/vomsdir
+      - ./assets/token_test_dynafed.sh:/token_test_dynafed.sh
+      - ./assets/request_token.sh:/request_token.sh
+      - ./assets/boost-x86_64.conf:/etc/ld.so.conf.d/boost-x86_64.conf
+      - ./assets/ugr-x86_64.conf:/etc/ld.so.conf.d/ugr-x86_64.conf
+    ports:
+      - "10443:10443"
+      - "1044:80"
+    networks:
+      default:
+        aliases:
+          - dynafed.local
+    #depends_on:
+      #- cache_1
+      #- cache_2

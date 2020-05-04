@@ -1,0 +1,78 @@
+version: "3.5"
+
+volumes:
+  saconfig:
+  mapfilesconfig:
+  webdav_hostcert:
+  webdav_certs:
+  vomsdir:
+  storage:
+
+services:
+  storm_webdav_setup:
+    build:
+      context: .
+      dockerfile: assets/docker/setup/Dockerfile
+    dns_search: 8.8.8.8
+    volumes:
+      - ./assets/certs/:/certs:ro
+      - ./assets/scripts:/scripts:ro
+      - ./assets/storm-webdav/etc/storm/webdav/sa.d/:/sa.d:ro
+      - ./assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/:/vo-mapfiles.d:ro
+      - ./assets/vomsdir:/vomsdir:ro
+      - ./assets/certs/digicert:/digicert
+      - ./assets/trust-anchors:/trust-anchors
+      - webdav_hostcert:/etc/grid-security/storm-webdav
+      - webdav_certs:/etc/grid-security/certificates
+      - vomsdir:/etc/grid-security/vomsdir
+      - saconfig:/etc/storm/webdav/sa.d
+      - mapfilesconfig:/etc/storm/webdav/vo-mapfiles.d
+
+  storm_webdav_storage:
+    image: italiangrid/storm-webdav-centos7:latest
+    volumes:
+      - webdav_hostcert:/etc/grid-security/storm-webdav
+      - webdav_certs:/etc/grid-security/certificates
+      - vomsdir:/etc/grid-security/vomsdir
+      - saconfig:/etc/storm/webdav/sa.d
+      - mapfilesconfig:/etc/storm/webdav/vo-mapfiles.d
+      - ./assets/scripts:/scripts:ro
+      - storage:/storage
+    depends_on:
+      - storm_webdav_setup
+    entrypoint:
+      - /scripts/init-storage.sh
+
+  storm_webdav:
+    build:
+      context: .
+      dockerfile: assets/docker/storm-webdav/Dockerfile
+    environment:
+      TZ: UTC
+      STORM_WEBDAV_REQUIRE_CLIENT_CERT: "false"
+      STORM_WEBDAV_HOSTNAME_0: ds-507.cr.cnaf.infn.it
+      STORM_WEBDAV_USE_CONSCRYPT: "true"
+      STORM_WEBDAV_REQUIRE_CLIENT_CERT: "false"
+      STORM_WEBDAV_HTTPS_PORT: 13443
+      STORM_WEBDAV_HTTP_PORT: 11085
+    dns_search: 127.0.0.11
+    volumes:
+      - ./assets/storm-webdav/etc/storm/webdav/config:/etc/storm/webdav/config:ro
+      - webdav_certs:/etc/grid-security/certificates
+      - webdav_hostcert:/etc/grid-security/storm-webdav
+      - saconfig:/etc/storm/webdav/sa.d
+      - mapfilesconfig:/etc/storm/webdav/vo-mapfiles.d
+      - vomsdir:/etc/grid-security/vomsdir
+      - storage:/storage
+    extra_hosts:
+      - "cloud-vm159.cloud.cnaf.infn.it:131.154.96.159"
+      - " iam.local.io:131.154.96.159"
+    depends_on:
+      - storm_webdav_storage
+    ports:
+      - "11443:11443"
+      - "11085:11085"
+    networks:
+      default:
+        aliases:
+          - ds-507.cr.cnaf.infn.it

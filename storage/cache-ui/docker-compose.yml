@@ -1,0 +1,50 @@
+version: "3.5"
+
+services:
+  cache_1:
+    build:
+      context: .
+      dockerfile: assets/cache/docker/Dockerfile
+    environment:
+      TZ: UTC
+    dns_search: 
+        - 131.154.1.3
+    volumes:
+      - /cache/nvme:/data/nginx/cache
+      - ./assets/cache/docker/nginx_voms_token_webdav_cache_3.conf:/work/conf/nginx.conf
+      - ./assets/cache/docker/mime.types:/work/conf/mime.types
+    extra_hosts:
+      - "cloud-vm159.cloud.cnaf.infn.it:131.154.96.159"
+    ports:
+      - "13443:13443"
+    networks:
+      default:
+        aliases:
+          - cache.example
+  ui:
+    build:
+      context: .
+      dockerfile: assets/ui/docker/Dockerfile
+    entrypoint: sleep infinity
+    hostname: "client_cache_1"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    volumes:
+      - ./assets/ui/usercert/usercert.pem:/home/storm/.globus/usercert.pem
+      - ./assets/ui/usercert/userkey.pem:/home/storm/.globus/userkey.pem
+      - ./assets/ui/usercert/user.p12:/home/storm/.globus/usercred.p12
+      - ./assets/ui/trust-anchors:/trust-anchors
+      - ./assets/ui/certs/digicert:/digicert
+      - ./assets/ui/scripts/register_client.sh:/home/storm/register_client.sh
+      - ./assets/ui/scripts:/home/storm/scripts
+      - ./assets/ui/oidc-agent/:/home/storm/.oidc-agent/
+      - ./assets/ui/vomsdir:/etc/grid-security/vomsdir
+      - ./assets/ui/vomses:/etc/vomses
+    extra_hosts:
+      - "cloud-vm159.cloud.cnaf.infn.it:131.154.96.159"
+      - " iam.local.io:131.154.96.159"
+    networks:
+      default:
+        aliases:
+          - ui.example

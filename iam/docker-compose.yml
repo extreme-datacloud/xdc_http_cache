@@ -1,0 +1,130 @@
+version: "3.5"
+
+volumes:
+  db_data:
+
+services:
+  db_data:
+    image: busybox
+    volumes:
+      - db_data:/var/lib/mysql
+
+    command: /bin/true
+
+  db:
+    container_name: db
+    image: mariadb:latest
+    command: --max_allowed_packet=256M
+    command: --log_warnings=1
+    environment:
+      TZ: UTC
+      MYSQL_ROOT_PASSWORD: pwd
+      MYSQL_USER: iam
+      MYSQL_PASSWORD: pwd
+      MYSQL_DATABASE: iam
+    depends_on:
+      - db_data
+    ports:
+      - "3306:3306"
+    networks:
+      default:
+        aliases:
+          - db.example
+
+  iam-be:
+    container_name: iam-be
+    build:
+      context: .
+      dockerfile: assets/iam-be/Dockerfile
+
+    environment:
+      TZ: UTC
+      IAM_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=mysql-test
+      IAM_HOST: ${IAM_HOSTNAME:-iam.local.io}
+      IAM_BASE_URL: https://${IAM_HOSTNAME:-iam.local.io}
+      IAM_ISSUER: https://${IAM_HOSTNAME:-iam.local.io}
+      IAM_USE_FORWARDED_HEADERS: "true"
+      IAM_NOTIFICATION_DISABLE: "true"
+
+      IAM_DB_HOST: db
+      IAM_DB_USERNAME: iam
+      IAM_DB_PASSWORD: pwd
+
+    depends_on:
+      - db
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - /dev/urandom:/dev/random
+
+  iam:
+    container_name: iam
+    build:
+      context: .
+      dockerfile: assets/iam-nginx/Dockerfile
+    depends_on:
+      - iam-be
+
+    dns_search: 127.0.0.11
+
+    environment:
+      TZ: UTC
+      NGINX_HOST: iam
+      NGINX_PORT: 443
+
+    ports:
+      - "443:443"
+      - "80:80"
+
+    volumes:
+      - /dev/urandom:/dev/random
+      - ./assets/iam-nginx/iam.conf:/etc/nginx/conf.d/default.conf
+
+    networks:
+      default:
+        aliases:
+          - iam.local.io
+
+  voms-aa:
+    container_name: voms
+    hostname: cloud-vm159.cloud.cnaf.infn.it
+    build:
+      context: .
+      dockerfile: assets/voms-aa/docker/Dockerfile
+    ports:
+      - "15000:15000"
+    depends_on:
+      - iam-be
+    networks:
+      default:
+        aliases:
+          - voms-aa.example
+
+  voms-rdr:
+    container_name: voms-rdr
+    build:
+      context: .
+      dockerfile: assets/voms-rdr/Dockerfile
+    depends_on:
+      - voms-aa
+
+    environment:
+      TZ: UTC
+      NGINX_HOST: voms-rdr
+      NGINX_PORT: 9443
+
+    ports:
+      - "9443:9443"
+      - "1144:80"
+
+    volumes:
+      - /dev/urandom:/dev/random
+      - ./assets/voms-rdr/voms.conf:/etc/nginx/conf.d/default.conf
+
+    networks:
+      default:
+        aliases:
+         - voms-rdr.example
+         - cloud-vm159.cloud.cnaf.infn.it

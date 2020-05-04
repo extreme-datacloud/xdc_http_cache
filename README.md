@@ -8,17 +8,59 @@ This project includes a playground for a demonstrator of a distributed system of
 
 The project consists of several docker-compose files with purpose of either deploy the component that we are going to describe of testing them as whole local setup.
 The service deployed consist of :
+  - user interface
   - storage elements
   - cache (the caching server you actually contact)
   - federation server
 
-In this repository you will not find a client container which is supposed to be external to the deployment. A simple concept of what a cache can do is depicted in th following diagram. The contact the caching service instead of the
-
 ![Simple Cache](/images/Simple_Cache.png)
 
-In the context of this work the client will authenticate to the storage element using proxy certificate augmented with VOMS Attribute Certificates. The role of the cache will be played by an nginx instance with an additional module for VOMS attribute support developed on purpose.
+In the context of this work the client will authenticate to the storage element using proxy certificate augmented with VOMS Attribute Certificates or using an OIDC token. The role of the cache will be played by an nginx instance with an additional module for VOMS attribute support developed on purpose.
 
-![Simple Cache](/images/Simple_Cache_VOMS_Enabled.png)
+![Simple Cache](/images/Simple_Cache_VOMS_Enabled.png )
+
+
+# User interface container
+The user interface container provides the utilities to create a VOMS proxy (voms-clients-java) or request a token (oidc-agent).
+The user interface can be deployed with the following commands:
+```
+docker-compose build # first time
+docker-compose up -d
+```
+In order to work few modification must be done on the docker-compose.yml file. The location of the user x509 certificate and the corresponding private key must be provided. The corresponding configuration file for the VO to be configured must be provided under the `vomses` and `vomsdir` folders. These folders contain reference example files.
+When the user interface is up it is possible to login with:
+```
+docker exec -it <ui container id> /bin/bash
+```
+A VOMS proxy can requested using the command:
+```
+voms-proxy-init --voms <vo name>
+```
+while a token can be requested using the following commands:
+```
+eval `oidc-agent`
+export CLIENT=<registered client>
+oidc-add $CLIENT
+export SUBJECT_TOKEN=$(oidc-token $CLIENT)
+```
+In order to request a token a client must be registered in the selected IAM (the OIDC provider choosen for this deployment). For this we invite to refer  to the documentation:
+![IAM documentation][https://indigo-iam.github.io/docs/v/current/]
+
+With the VOMS proxy or the token then HTTP requests can be be made using `curl` or `davix`. A few usage examples is reported:
+
+```
+curl -v -s --capath /digicert \
+     -L https://<hostname>:<port>/<path> \
+     -o /tmp/<path> \
+     -H "Authorization: Bearer ${SUBJECT_TOKEN}"
+
+davix-get  -H "Authorization: Bearer ${SUBJECT_TOKEN}"   https://<hostname>:<port>/<path>
+
+davix-put -P grid <file>  https://<hostname>:<port>/<path>
+```
+For a complete documentation we refere to:
+![curl][https://curl.haxx.se/]
+![davix][https://dmc.web.cern.ch/projects/davix/home]
 
 The code for the module can be found here:
 ![Nginx voms module][https://baltig.infn.it/storm2/ngx_http_voms_module/blob/master/src/ngx_http_voms_module.cpp]

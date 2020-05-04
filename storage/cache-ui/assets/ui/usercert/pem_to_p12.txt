@@ -1,0 +1,1 @@
+openssl pkcs12 -export -out user.p12 -inkey userkey.pem -in usercert.pem 
