@@ -1,43 +1,42 @@
-place certs in usercert folder
-
-if run locally  add ui to iam network
-
-docker network connect <iam container network> <ui container>
-
+# User interface
+The user interface container provides the utilities to create a VOMS proxy (voms-clients-java) or request a token (oidc-agent).
+The user interface can be deployed with the following commands:
+```
+docker-compose build # first time
+docker-compose up -d
+```
+In order to work few modification must be done on the docker-compose.yml file. The location of the user x509 certificate and the corresponding private key must be provided. The corresponding configuration file for the VO to be configured must be provided under the `vomses` and `vomsdir` folders. These folders contain reference example files.
+When the user interface is up it is possible to login with:
+```
+docker exec -it <ui container id> /bin/bash
+```
+A VOMS proxy can requested using the command:
+```
+voms-proxy-init --voms <vo name>
+```
+while a token can be requested using the following commands:
+```
 eval `oidc-agent`
-
-oidc-gen -w device
-
-then overwrite the local conf if any, choose the provide and when the code is provided open a browser an authorize the client.
-
-
-Add already registered client
-
-oidc-add <client>
-
-ask for password
-
-
-Request token
-export CLIENT=test-local
+export CLIENT=<registered client>
+oidc-add $CLIENT
 export SUBJECT_TOKEN=$(oidc-token $CLIENT)
+```
+In order to request a token a client must be registered in the selected IAM (the OIDC provider choosen for this deployment). For this we invite to refer  to the documentation:
+[IAM documentation](https://indigo-iam.github.io/docs/v/current/)
 
-Get token expiration
-oidc-token  $CLIENT -e
+With the VOMS proxy or the token then HTTP requests can be be made using `curl` or `davix`. A few usage examples is reported:
 
-
-Get a file from storm webdav
+```
 curl -v -s --capath /digicert \
-     -L https://<hostname>:<port>/myfed/indigo-dc/test_file_1.txt \
-     -o /tmp/test_file_1.txt \
+     -L https://<hostname>:<port>/<path> \
+     -o /tmp/<path> \
      -H "Authorization: Bearer ${SUBJECT_TOKEN}"
 
-Using davix
-proxy
-davix-put -P grid <file>  https://storm.example:11443/indigo-dc/test_file_2.txt
+davix-get  -H "Authorization: Bearer ${SUBJECT_TOKEN}"   https://<hostname>:<port>/<path>
 
-token
-davix-put -H "Authorization: Bearer ${SUBJECT_TOKEN}" /home/storm/test_file_3.txt  https://storm.example:11443/indigo-dc/test_file_3.txt
-davix-get  -H "Authorization: Bearer ${SUBJECT_TOKEN}"   https://storm.example:11443/indigo-dc/test_file_3.txt
-davix-rm  -H "Authorization: Bearer ${SUBJECT_TOKEN}"   https://storm.example:11443/indigo-dc/test_file_3.txt
-davix-ls  -H "Authorization: Bearer ${SUBJECT_TOKEN}"   https://storm.example:11443/indigo-dc/
+davix-put -P grid <file>  https://<hostname>:<port>/<path>
+```
+For a complete documentation we refere to:
+[curl](https://curl.haxx.se/)
+[davix](https://dmc.web.cern.ch/projects/davix/home)
+
