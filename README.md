@@ -59,11 +59,11 @@ davix-get  -H "Authorization: Bearer ${SUBJECT_TOKEN}"   https://<hostname>:<por
 davix-put -P grid <file>  https://<hostname>:<port>/<path>
 ```
 For a complete documentation we refere to:
-![curl][https://curl.haxx.se/]
-![davix][https://dmc.web.cern.ch/projects/davix/home]
+[curl](https://curl.haxx.se/)
+[davix](https://dmc.web.cern.ch/projects/davix/home)
 
 The code for the module can be found here:
-![Nginx voms module][https://baltig.infn.it/storm2/ngx_http_voms_module/blob/master/src/ngx_http_voms_module.cpp]
+[Nginx voms module](https://baltig.infn.it/storm2/ngx_http_voms_module/blob/master/src/ngx_http_voms_module.cpp)
 
 The deployment described in this repository are based on docker-compose and in particular on an nginx image based on openresty already compiled against the additional module.
 
