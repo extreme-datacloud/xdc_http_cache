@@ -1,10 +1,10 @@
-FROM indigoiam/voms-aa
+FROM ffornari/http-storage-demo-cnaf:voms-aa
 
 RUN apt-get update -y && apt-get install -y ca-certificates curl nano && apt-get clean all
 
-COPY assets/certs/digicert/Fullchain.pem /usr/local/share/ca-certificates/Fullchain.crt
-COPY assets/certs/digicert/FullchainHost.pem /usr/local/share/ca-certificates/FullchainHost.crt
-COPY assets/trust-anchors/igi-test-ca.pem /usr/local/share/ca-certificates/igi-test-ca.crt
+COPY iam/assets/certs/digicert/Fullchain.pem /usr/local/share/ca-certificates/Fullchain.crt
+COPY iam/assets/certs/digicert/FullchainHost.pem /usr/local/share/ca-certificates/FullchainHost.crt
+COPY iam/assets/trust-anchors/igi-test-ca.pem /usr/local/share/ca-certificates/igi-test-ca.crt
 
 RUN update-ca-certificates && apt-get update -y && apt-get install ca-certificates-java -y
 
@@ -12,9 +12,9 @@ WORKDIR /voms-aa
     
 RUN mkdir -p /etc/grid-security/voms
 
-COPY assets/certs/digicert/cloud-vm159_cloud_cnaf_infn_it.crt /etc/grid-security/voms/hostcert.pem
-COPY assets/certs/digicert/cloud-vm159_cloud_cnaf_infn_it.key /etc/grid-security/voms/hostkey.pem
-COPY assets/certs/digicert/cloud-vm159_cloud_cnaf_infn_it.p12 /etc/grid-security/voms/keystore.p12
+COPY certs/hostcert.pem /etc/grid-security/voms/hostcert.pem
+COPY certs/hostkey.pem /etc/grid-security/voms/hostkey.pem
+COPY certs/keystore.p12 /etc/grid-security/voms/keystore.p12
 
 EXPOSE 15000
 
@@ -39,7 +39,7 @@ RUN mkdir voms-aa && \
     sed -i "26r tmp.yml" voms-aa/BOOT-INF/classes/application.yml && \
 #    sed -i 's/logging.level.root=WARN/logging.level.root=DEBUG/g' \
 #        voms-aa/BOOT-INF/classes/application.properties && \
-    sed -i 's/  address: localhost/  address: cloud-vm159.cloud.cnaf.infn.it/g' \
+    sed -i 's/  address: localhost/  address: ${HOSTNAME}/g' \
         voms-aa/BOOT-INF/classes/application.yml && \
     sed -i 's/    vo-name: test/    vo-name: indigo-dc/g' \
         voms-aa/BOOT-INF/classes/application.yml && \
@@ -50,7 +50,7 @@ RUN mkdir voms-aa && \
 printf '  ssl: \
 \n    key-store: /etc/grid-security/voms/keystore.p12 \
 \n    key-store-type: pkcs12 \
-\n    key-store-password: iam_test_ssl_cert\n' > tmp.yml && \
+\n    key-store-password: voms_aa_ssl_cert\n' > tmp.yml && \
     sed -i "18r tmp.yml" voms-aa/BOOT-INF/classes/application.yml && \
     rm -f tmp.yml voms-aa.jar && \
     jar -cvf0m voms-aa.jar voms-aa/META-INF/MANIFEST.MF -C voms-aa .

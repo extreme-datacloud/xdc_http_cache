@@ -33,19 +33,19 @@ services:
 
   iam-be:
     container_name: iam-be
+    hostname: ${HOSTNAME}
     build:
-      context: .
-      dockerfile: assets/iam-be/Dockerfile
+      context: ../
+      dockerfile: iam/assets/iam-be/Dockerfile
 
     environment:
       TZ: UTC
       IAM_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=mysql-test
-      IAM_HOST: ${IAM_HOSTNAME:-iam.local.io}
-      IAM_BASE_URL: https://${IAM_HOSTNAME:-iam.local.io}
-      IAM_ISSUER: https://${IAM_HOSTNAME:-iam.local.io}
+      IAM_HOST: ${IAM_HOSTNAME:-${HOSTNAME}}
+      IAM_BASE_URL: https://${IAM_HOSTNAME:-${HOSTNAME}}
+      IAM_ISSUER: https://${IAM_HOSTNAME:-${HOSTNAME}}
       IAM_USE_FORWARDED_HEADERS: "true"
       IAM_NOTIFICATION_DISABLE: "true"
-
       IAM_DB_HOST: db
       IAM_DB_USERNAME: iam
       IAM_DB_PASSWORD: pwd
@@ -62,8 +62,8 @@ services:
   iam:
     container_name: iam
     build:
-      context: .
-      dockerfile: assets/iam-nginx/Dockerfile
+      context: ../
+      dockerfile: iam/assets/iam-nginx/Dockerfile
     depends_on:
       - iam-be
 
@@ -89,10 +89,10 @@ services:
 
   voms-aa:
     container_name: voms
-    hostname: cloud-vm159.cloud.cnaf.infn.it
+    hostname: ${HOSTNAME}
     build:
-      context: .
-      dockerfile: assets/voms-aa/docker/Dockerfile
+      context: ../
+      dockerfile: iam/assets/voms-aa/docker/Dockerfile
     ports:
       - "15000:15000"
     depends_on:
@@ -104,9 +104,10 @@ services:
 
   voms-rdr:
     container_name: voms-rdr
+    hostname: ${HOSTNAME}
     build:
-      context: .
-      dockerfile: assets/voms-rdr/Dockerfile
+      context: ../
+      dockerfile: iam/assets/voms-rdr/Dockerfile
     depends_on:
       - voms-aa
 
@@ -127,4 +128,4 @@ services:
       default:
         aliases:
          - voms-rdr.example
-         - cloud-vm159.cloud.cnaf.infn.it
+         - ${HOSTNAME}
