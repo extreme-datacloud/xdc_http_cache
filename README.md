@@ -5,6 +5,10 @@ This project includes a playground for a demonstrator of a distributed system of
 ![Simple Cache](/images/Simple_Cache.png) {.center}
 ![Simple Cache](/images/Simple_Cache_VOMS_Enabled.png ) {.center}
 
+#.center {
+  display: block;
+  margin: 0 auto;
+}
 
 # Getting started
 
