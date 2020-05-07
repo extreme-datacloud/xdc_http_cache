@@ -8,18 +8,16 @@ services:
     environment:
       TZ: UTC
     dns_search: 
-        - 131.154.1.3
+        - 8.8.8.8
     volumes:
       - /cache/nvme:/data/nginx/cache
-      - ./assets/docker/nginx_voms_token_webdav_cache_3.conf:/work/conf/nginx.conf
+      - ./assets/docker/nginx.conf:/work/conf/nginx.conf
       - ./assets/docker/mime.types:/work/conf/mime.types
-    extra_hosts:
-      - "cloud-vm159.cloud.cnaf.infn.it:131.154.96.159"
     ports:
       - "13443:13443"
     networks:
       default:
         aliases:
-          - cache.example
+          - nginx.example
     #depends_on:
       #- storm_webdav_1
