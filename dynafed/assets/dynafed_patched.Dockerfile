@@ -2,7 +2,7 @@ FROM centos:7
 
 RUN yum install epel-release centos-release-scl -y
 
-COPY assets/dynafed/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
+COPY dynafed/assets/dynafed/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
 RUN yum install ca-policy-egi-core fetch-crl -y
 
 RUN yum install wget \
