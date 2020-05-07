@@ -2,8 +2,8 @@
 
 This project includes a playground for a demonstrator of a distributed system of storage, comprising storage elements, caches and redirectors, communicating via HTTPS.
 
-![Simple Cache](/images/Simple_Cache.png){.center}
-![Simple Cache](/images/Simple_Cache_VOMS_Enabled.png ){.center}
+![Simple Cache](/images/Simple_Cache.png) {.center}
+![Simple Cache](/images/Simple_Cache_VOMS_Enabled.png ) {.center}
 
 
 # Getting started
