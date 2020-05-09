@@ -8,14 +8,28 @@ The other service is `voms-aa` which is part of the [VOMS Admin server](https://
 
 ## IAM deployment prerequisites
 The IAM service deployment consist of four container: two for the mariadb and its data, one for iam service and an ssl terminator.
-So in order for the service to work you must obtain a valid x509 certificate and the file [iam.conf](assets/iam-nginx/iam.conf) must be changed accordingly.
+So in order for the service to work you must obtain a valid x509 certificate and put it in `xdc_http_cache/certs`.
 
 ## voms-aa deployment prerequisites
-Also the `voms-aa` service needs a valid x509 certificate to work. The the [Dockerfile](assets/voms-aa/docker/Dockerfile) must then be adapter before building the image changing the path of the certificates along with the name of VO configured.
-The `voms-rdr` is just the ssl terminator which should be modified with the names and path of the server certificates [voms.conf](assets/voms-rdr/voms.conf).
+Also the `voms-aa` service needs a valid x509 certificate to work, this certificate being the same already put in `xdc_http_cache/certs`. The [Dockerfile](assets/voms-aa/docker/Dockerfile) must be adapted before building the image possibly changing the name of the configured VO.
+The `voms-rdr` service is just the ssl terminator.
 
 ## Final setup
-After building the container and running the services in order to complete the setup the user certificates must be added to IAM, which in turn will be able to generate the VOMS proxy when contacted. This can be be done on a per-user basis and adding the user to a group which name matches the name of the VO.
+Please, be careful about timings the first time you start the services. The recommendation is to start db service in a separate `screen` session without daemonizing, i.e.:
+```
+screen
+docker-compose up db # first time
+```
+Then, when the db service has completed its setup, start iam-be service in a separate `screen` session without daemonizing, i.e.:
+```
+screen
+docker-compose up iam-be # first time
+```
+If iam-be service is able to setup and run, it means that the iam-be host registration on the db has been successful. At this point you can shutdown the services in the `screen` sessions with `CTRL+C` and start IAM with the following command:
+```
+docker-compose up
+```
+After building the container and running the services, in order to complete the setup, the user certificates must be added to the corresponding IAM account, so that IAM in turn will be able to generate the VOMS proxy when contacted. This can be be done on a per-user basis and adding the user to a group whose name matches the name of the VO.
 
 
 

@@ -11,7 +11,7 @@ if [ ! -z $APACHE_PID ]; then kill  $APACHE_PID; fi
 if [ ! -z $PHP_PID ]; then kill  $PHP_PID; fi
 if [ ! -z $MEMCACHED_PID ]; then kill  $MEMCACHED_PID; fi
 
-/request_token.sh
+source /oidc_get_token.sh
 
 rm -rf /run/httpd/*
 

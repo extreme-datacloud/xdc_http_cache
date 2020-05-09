@@ -34,10 +34,7 @@ services:
   iam-be:
     container_name: iam-be
     hostname: ${HOSTNAME}
-    build:
-      context: ../
-      dockerfile: iam/assets/iam-be/Dockerfile
-
+    image: ${IAM_IMAGE:-indigoiam/iam-login-service:v1.5.0.RELEASE-latest}
     environment:
       TZ: UTC
       IAM_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=mysql-test
@@ -49,6 +46,7 @@ services:
       IAM_DB_HOST: db
       IAM_DB_USERNAME: iam
       IAM_DB_PASSWORD: pwd
+      IAM_X509_TRUST_ANCHORS_DIR: "/etc/ssl/certs"
 
     depends_on:
       - db

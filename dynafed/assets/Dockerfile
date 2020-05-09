@@ -6,7 +6,7 @@ ENV CLIENT_SECRET=
 ENV CLIENT_PASSPHRASE=
 
 RUN yum install \
-	mod_auth_openidc mod_ssl net-tools geolite2-city jq cronie telnet \
+	mod_auth_openidc mod_ssl net-tools geolite2-city jq cronie telnet expect \
 	-y
 
 RUN cd /etc/yum.repos.d/ \
@@ -14,6 +14,8 @@ RUN cd /etc/yum.repos.d/ \
     && yum install rsyslog -y \
     && rm -f /etc/rsyslog.d/listen.conf \
     && mkdir /digicert
+
+RUN yum install -y http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
 
 RUN yum install edg-mkgridmap php-fpm -y
 
@@ -88,4 +90,6 @@ RUN chmod 0644 /var/spool/cron/token_cronjob && \
 EXPOSE 1044
 EXPOSE 10443
 
-CMD /usr/sbin/crond && /startup.sh
+CMD /replace_iam_ip.sh $IAM_HOSTNAME && \
+    eval `oidc-agent -g | grep -v Agent > /etc/profile.d/oidc-agent.sh` && \
+    /usr/sbin/crond && /startup.sh

@@ -20,7 +20,11 @@ services:
       - ./assets/accessfile:/etc/grid-security/accessfile
       - ./assets/grid-mapfile:/etc/grid-security/grid-mapfile
       - ./assets/vomsdir:/etc/grid-security/vomsdir
-      - ./assets/request_token.sh:/request_token.sh
+      - ./assets/register_client.sh:/register_client.sh
+      - ./assets/oidc_get_token.sh:/oidc_get_token.sh
+      - ./assets/oidc_expect.sh:/oidc_expect.sh
+      - ./assets/oidc-agent/:/root/.oidc-agent/
+      - ./assets/replace_iam_ip.sh:/replace_iam_ip.sh
       - ./assets/boost-x86_64.conf:/etc/ld.so.conf.d/boost-x86_64.conf
       - ./assets/ugr-x86_64.conf:/etc/ld.so.conf.d/ugr-x86_64.conf
     ports:
