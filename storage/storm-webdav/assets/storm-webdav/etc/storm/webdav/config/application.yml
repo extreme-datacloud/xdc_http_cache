@@ -15,8 +15,8 @@
 #
 # oauth:
 #   issuers:
-#     - name: iam-test
-#       issuer: https://iam-test.indigo-datacloud.eu/
+#     - name: 
+#       issuer: https:///
 # 
 # And in the storage area configuration `/etc/storm/sa.d/example.properties`:
 #
@@ -25,5 +25,5 @@
 #
 oauth:
   issuers:
-    - name: cloud-vm159.cloud.cnaf.infn.it
-      issuer: https://cloud-vm159.cloud.cnaf.infn.it/
+    - name: 
+      issuer: https:///

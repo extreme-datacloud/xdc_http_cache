@@ -1,14 +1,17 @@
 FROM ffornari/http-storage-demo-cnaf:nginx_voms_centos7
 
+ENV IAM_HOSTNAME=
 ENV PATH="/usr/local/openresty/bin:${PATH}"
 ENV LD_PRELOAD="/usr/local/lib/libopenssl_evp_redefine.so"
 
 WORKDIR work/
 
-COPY assets/certs/hostcert/ /hostcert/
-COPY assets/vomsdir/ /vomsdir/
+COPY certs/ /hostcert/
+COPY storage/cache/assets/vomsdir/ /vomsdir/
+COPY storage/cache/assets/trust-anchors/FullchainHost.pem /etc/grid-security/certificates/
+COPY storage/cache/assets/trust-anchors/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
 
-COPY assets/docker/libopenssl_evp_redefine.so /usr/local/lib/
+COPY storage/cache/assets/docker/libopenssl_evp_redefine.so /usr/local/lib/
 
 RUN opm get zmartzone/lua-resty-openidc
 
@@ -20,4 +23,5 @@ STOPSIGNAL SIGTERM
 
 RUN update-ca-trust
 
-CMD /usr/local/openresty/nginx/sbin/nginx -p ./ -c conf/nginx.conf -g 'daemon off;'
+CMD /work/replace_iam_ip.sh $IAM_HOSTNAME && \
+    /usr/local/openresty/nginx/sbin/nginx -p ./ -c conf/nginx.conf -g 'daemon off;'

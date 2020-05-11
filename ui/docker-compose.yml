@@ -5,21 +5,9 @@ services:
     build:
       context: .
       dockerfile: assets/docker/Dockerfile
-    entrypoint: sleep infinity
-    hostname: "client_cache_1"
+    hostname: ${HOSTNAME}
     volumes:
-      - ./assets/usercert/usercert.pem:/home/storm/.globus/usercert.pem
-      - ./assets/usercert/userkey.pem:/home/storm/.globus/userkey.pem
-      - ./assets/usercert/user.p12:/home/storm/.globus/usercred.p12
-      - ./assets/trust-anchors:/trust-anchors
-      - ./assets/certs/digicert:/digicert
-      - ./assets/scripts/register_client.sh:/home/storm/register_client.sh
-      - ./assets/scripts:/home/storm/scripts
       - ./assets/oidc-agent/:/home/storm/.oidc-agent/
-      - ./assets/vomsdir:/etc/grid-security/vomsdir
-      - ./assets/vomses:/etc/vomses
-    extra_hosts:
-      - " iam.local.io:127.0.0.1"
     networks:
       default:
         aliases:

@@ -85,45 +85,50 @@ services:
         aliases:
           - iam.local.io
 
-  voms-aa:
-    container_name: voms
-    hostname: ${HOSTNAME}
+  nginx-voms:
+    #image: storm2/ngx-voms:latest
     build:
       context: ../
-      dockerfile: iam/assets/voms-aa/docker/Dockerfile
+      dockerfile: iam/assets/nginx-voms/Dockerfile
+    hostname: iam
     ports:
-      - "15000:15000"
-    depends_on:
-      - iam-be
-    networks:
-      default:
-        aliases:
-          - voms-aa.example
+      - "15000:443"
 
-  voms-rdr:
-    container_name: voms-rdr
-    hostname: ${HOSTNAME}
-    build:
-      context: ../
-      dockerfile: iam/assets/voms-rdr/Dockerfile
     depends_on:
-      - voms-aa
+      - vomsng
 
     environment:
-      TZ: UTC
-      NGINX_HOST: voms-rdr
-      NGINX_PORT: 9443
 
-    ports:
-      - "9443:9443"
-      - "1144:80"
+      TZ: UTC
+      X509_VOMS_DIR: /vomsdir
 
     volumes:
-      - /dev/urandom:/dev/random
-      - ./assets/voms-rdr/voms.conf:/etc/nginx/conf.d/default.conf
-
+      - ./assets/vomsdir:/vomsdir
+      - ./assets/nginx-voms/nginx.conf:/home/build/local/openresty/nginx/conf/nginx.conf:ro
+      - ./assets/nginx-voms/conf.d:/etc/nginx/conf.d:ro
     networks:
       default:
         aliases:
-         - voms-rdr.example
-         - ${HOSTNAME}
+          - ${HOSTNAME}
+  
+  vomsng:
+    #image: indigoiam/voms-aa:latest
+    build:
+      context: ../
+      dockerfile: iam/assets/vomsng/docker/Dockerfile
+    hostname: vomsng
+    environment:
+      TZ: Europe/Rome
+      IAM_DB_HOST: db
+      IAM_DB_USERNAME: iam
+      IAM_DB_PASSWORD: pwd
+      VOMS_NG_JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom -Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=n,address=1044
+    
+    ports:
+      - "9444:1044"
+
+    depends_on:
+      - iam-be
+
+    volumes:
+      - ./assets/etc/vomsng:/voms-aa/config:ro

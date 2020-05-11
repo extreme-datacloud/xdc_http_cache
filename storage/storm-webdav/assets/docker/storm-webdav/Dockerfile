@@ -1,13 +1,15 @@
 FROM italiangrid/storm-webdav-centos7:latest
 
+ENV IAM_HOSTNAME=
+
 USER root
 
 RUN yum install -y java-1.8.0-openjdk-devel
 
-COPY assets/trust-anchors/igi-test-ca.pem /etc/pki/ca-trust/source/anchors/igi-test-ca.pem
-COPY assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/FullchainHost.pem
+COPY storage/storm-webdav/assets/trust-anchors/igi-test-ca.pem /etc/pki/ca-trust/source/anchors/igi-test-ca.pem
+COPY storage/storm-webdav/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/FullchainHost.pem
 
-COPY assets/storm-webdav/etc/sysconfig/storm-webdav /etc/sysconfig/storm-webdav
+COPY storage/storm-webdav/assets/storm-webdav/etc/sysconfig/storm-webdav /etc/sysconfig/storm-webdav
 
 RUN chown storm.storm -R /etc/pki && \
     mkdir storm-webdav-server && \
@@ -22,8 +24,4 @@ RUN chown storm.storm -R /etc/pki && \
     jar -cvf0m /usr/share/java/storm-webdav/storm-webdav-server.jar \
     storm-webdav-server/META-INF/MANIFEST.MF -C storm-webdav-server .
 
-RUN chown storm.storm -R /etc/pki
-
-USER storm
-
-CMD /run.sh
+CMD /home/storm/replace_iam_ip.sh $IAM_HOSTNAME && /run.sh

@@ -2,15 +2,17 @@ version: "3.5"
 
 services:
   cache_1:
+    hostname: ${HOSTNAME}
     build:
-      context: .
-      dockerfile: assets/docker/Dockerfile
+      context: ../../
+      dockerfile: storage/cache/assets/docker/Dockerfile
     environment:
       TZ: UTC
     dns_search: 
         - 8.8.8.8
     volumes:
       - /cache/nvme:/data/nginx/cache
+      - ./assets/docker/replace_iam_ip.sh:/work/replace_iam_ip.sh
       - ./assets/docker/nginx.conf:/work/conf/nginx.conf
       - ./assets/docker/mime.types:/work/conf/mime.types
     ports:
