@@ -1,16 +1,12 @@
 # User interface
 The user interface container provides the utilities to create a VOMS proxy (voms-clients-java) or request a token (oidc-agent).
-The user interface can be deployed with the following commands:
-```
-docker-compose build # first time
-docker-compose up -d
-```
 In order to work few modification must be done on the docker-compose.yml file. The location of the user x509 certificate and the corresponding private key must be provided. The corresponding configuration file for the VO to be configured must be provided under the `vomses` and `vomsdir` folders. These folders contain reference example files.
-When the user interface is up it is possible to login with:
+Since you have to open a browser from inside the docker container (required for IAM account or token exchange client registration with `oidc-agent`), in order to start the ui service just go to `xdc_http_cache/scripts`, run `configure_services.sh` selecting ui, and then, after building the docker image in `xdc_http_cache/ui`, run `connect_ui.sh`:
 ```
-docker exec -it <ui container id> /bin/bash
+docker-compose build
+./connect_ui.sh
 ```
-A VOMS proxy can requested using the command:
+A VOMS proxy can be requested using the command:
 ```
 voms-proxy-init --voms <vo name>
 ```

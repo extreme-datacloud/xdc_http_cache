@@ -1,18 +1,18 @@
 # IAM service
 This  repository  contains also a recipe to instantiate a IAM  provider OIDC provider service. The `docker-compose.yml` deploys the following services:
 * iam 
-* voms-aa
+* vomsng
 
 IAM is an Identity and Access Management service for which the documentation can be found at [IAM documentation](https://indigo-iam.github.io/docs/v/current/). In xdc-http-cache IAM is the OpenID connect provider. xdc-http-cache can use an external provider but in this deployment a specific configuration for IAM is configured.
-The other service is `voms-aa` which is part of the [VOMS Admin server](https://github.com/italiangrid/voms-admin-server) application. It allows to obtain a VOMS proxy from an instance.
+The other service is `vomsng` which is part of the [VOMS Admin server](https://github.com/italiangrid/voms-admin-server) application. It allows to obtain a VOMS proxy from an instance.
 
 ## IAM deployment prerequisites
 The IAM service deployment consist of four container: two for the mariadb and its data, one for iam service and an ssl terminator.
-So in order for the service to work you must obtain a valid x509 certificate and put it in `xdc_http_cache/certs`.
+So in order for the service to work you must obtain a valid x509 certificate and put it in `xdc_http_cache/certs`. Then you must move to `xdc_http_cache/scripts`, run `configure_services.sh` selecting iam service and follow the instructions provided by the script.
 
-## voms-aa deployment prerequisites
-Also the `voms-aa` service needs a valid x509 certificate to work, this certificate being the same already put in `xdc_http_cache/certs`. The [Dockerfile](assets/voms-aa/docker/Dockerfile) must be adapted before building the image possibly changing the name of the configured VO.
-The `voms-rdr` service is just the ssl terminator.
+## vomsng deployment prerequisites
+Also the `vomsng` service needs a valid x509 certificate to work, this certificate being the same already put in `xdc_http_cache/certs`. 
+The `nginx-voms` service is just the ssl terminator.
 
 ## Final setup
 Please, be careful about timings the first time you start the services. The recommendation is to start db service in a separate `screen` session without daemonizing, i.e.:

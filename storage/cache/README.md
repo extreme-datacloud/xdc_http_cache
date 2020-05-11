@@ -8,27 +8,15 @@ It also includes an nginx patch to ignore a possible '0' character at the beginn
 The OIDC support is enabled via the [zmartzone/lua-resty-openidc](https://github.com/zmartzone/lua-resty-openidc).
 
 ## Usage
-This repository an example configuration for a single VO (`indigo-dc`).
-In order to build the container a valid x.509 certificate and key for the server hosting the caching service must be provided and place under the `assets/certs/hostcert` folder. 
-The provided `nginx.conf` must be then modified accordingly. In particular the lines:
-```
-        ssl_certificate /hostcert/nginx.example.pem;
-        ssl_certificate_key /hostcert/nginx.example.key;
-
-```
-and 
-```
-              proxy_ssl_certificate /digicert/nginx.example.pem;
-              proxy_ssl_certificate_key /digicert/ngin.local.key;
-```
-must be chnaged.
+This repository contains an example configuration for a single VO (`indigo-dc`).
+In order to build the container, a valid x.509 certificate and key for the server hosting the caching service must be provided and placed under the `xdc_http_cache/certs` folder. 
 The provided `nginx.conf` contains two environment variable needed for the `ngx_http_voms_module`:
 ```
 env X509_VOMS_DIR=/vomsdir;
 env X509_CERT_DIR=/etc/grid-security/certificates;
 ```
 The `X509_VOMS_DIR` variable contains the path to the `vomsdir` folder containing the `lsc` files which contains the DN of the VOMS server and the DN of the CA.
-The configuration options  for the `lua-resty-openidc` module must be modified with the parameters for the OIDC provider:
+The configuration options  for the `lua-resty-openidc` module should be modified with the parameters for the OIDC provider:
 ```
                   local opts = {
                     discovery = "https://iam.example/.well-known/openid-configuration",
@@ -39,10 +27,11 @@ The configuration options  for the `lua-resty-openidc` module must be modified w
                   }
 
 ```
-Furthemore the storage endpoints for which the cache proxy the HTTP requests must be configured:
+Furthemore the storage endpoints for which the cache proxy the HTTP requests should be configured:
 ```
 ngx.var.proxy = 'se.example:11443';
 ```
+These parameters can be easily set moving to `xdc_http_cache/scripts`, running `configure_services.sh`, selecting cache service and following the instructions provided by the script.
 ### Cache configuration
 The cache configuration can be done changing the following parameters:
 ```

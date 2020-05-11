@@ -4,13 +4,15 @@ This project includes a playground for a demonstrator of a distributed system of
 
 # Getting started
 
-The project consists of several docker-compose files with purpose of either deploy the component that we are going to describe of testing them as whole local setup.
+The project consists of several docker-compose files with the purpose of either deploy the component that we are going to describe or testing them as whole local setup.
 The service deployed consist of :
   - user interface
   - storage elements
   - cache (the caching server you actually contact)
   - federation server
 
+Each service must be properly configured moving to `xdc_http_cache/scripts`, running `configure_services.sh`, selecting the desired service and following the instructions provided by the script.
+Please notice that `configure_services.sh` is developed for CentOS7 and requires to be run by a user with `sudo` privileges.
 ## Repository structure
 The repository is splitted in folders with at least one service setup docker-compose.yml file:
 
