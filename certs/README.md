@@ -1,3 +1,8 @@
-# Certificates
-In this directory you must put two files: hostcert.pem and hostkey.pem.
-Then you have to run generate_p12.sh ('expect' package is required).
+# Service Certificates
+
+Please, put here the server certificate and its private key for the services to run.
+Required files are :
+  - hostcert.pem
+  - hostkey.pem
+
+Note that the certificate must be issued by TERENA DigiCert for the services to work.
