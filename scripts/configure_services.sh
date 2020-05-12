@@ -70,6 +70,31 @@ if [ -n $service ] ; then
             ../ui/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         sed -i 's/\("indigo-dc" "\)\(.*\)/\1'"$iam_hostname"'" "15000" "\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN='"$iam_hostname"'" "indigo-dc"/g' \
             ../ui/assets/vomses/indigo-dc
+        sed -i 's/\(IAM_USERINFO_ENDPOINT:-https:\/\/\)\(.*\)/\1'"$iam_hostname"'\/userinfo})/g' ../ui/assets/scripts/get_userinfo.sh
+
+        printf '\nPlease, register an IAM account for your user. Opening Firefox...\n'
+        firefox https://$iam_hostname/
+        printf '\nNow, register a token exchange client for your user. Starting oidc-agent...\n'
+        printf '\n(Notice: You must enter IAM'"'"'s endpoint URL, i.e. https://'"$iam_hostname"'/, as Issuer when prompted)\n'
+        source ../ui/assets/scripts/register_client.sh
+        printf 'Finally, enter encryption Password for the last time: '
+        read -rs client_passphrase
+        client_name=$((ls -l ~/.oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}'))
+        cp -a ~/.oidc-agent/. ../ui/assets/oidc-agent/
+        cp -a ~/.config/oidc-agent/ ../ui/assets/
+
+        sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../ui/assets/scripts/oidc_get_token.sh
+        sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../ui/assets/scripts/oidc_expect.sh
+        sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../ui/assets/scripts/oidc_expect.sh
+
+        source ../ui/assets/scripts/oidc_get_token.sh
+        source ../ui/assets/scripts/get_userinfo.sh
+
+        printf '%s .indigo-dc' "$SUBJECT_HASH" > grid-mapfile
+
+        oidc-agent --kill 2>&1 > /dev/null
+        rm -rf ~/.oidc-agent/*
+        rm -rf ~/.config/oidc-agent/*
 
         xauth list > ../ui/assets/scripts/xauth_list.log
         
@@ -164,7 +189,7 @@ if [ -n $service ] ; then
         client_id=$(oidc-gen --pw-cmd="echo "$client_passphrase --print "$client_name" | jq '.client_id')
         client_secret=$(oidc-gen --pw-cmd="echo "$client_passphrase --print "$client_name" | jq '.client_secret')
         oidc-agent --kill 2>&1 > /dev/null
-        cp -a ~/.oidc-agent/ ../dynafed/assets/
+        cp -a ~/.oidc-agent/. ../dynafed/assets/oidc-agent/
         cp -a ~/.config/oidc-agent/ ../dynafed/assets/
         rm -rf ~/.oidc-agent/*
         rm -rf ~/.config/oidc-agent/*
@@ -252,7 +277,12 @@ locplugin.LOCAL-WEBDAV-%s.xlatepfx: /indigo-dc/ /\n\n' \
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../dynafed/assets/replace_iam_ip.sh
         
-        printf '\ndynafed service successfully configured!\n'
+        if [ -f grid-mapfile ]; then
+            cat grid-mapfile >> ../dynafed/assets/grid-mapfile
+            printf '\ndynafed service successfully configured!\n'
+        else
+            printf '\nWarning: ui service not yet configured, could not add user to grid-mapfile!\n'
+        fi
         ;;
 
       *)

@@ -7,6 +7,11 @@ RUN yum install epel-release -y
 COPY assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
 RUN yum install ca-policy-egi-core fetch-crl sharutils -y
 RUN yum install vim telnet screen expect xdg-utils xauth dbus-x11 firefox -y
+RUN \
+  yum -y install redhat-lsb-core wget git tar && \
+  #yum -y update && \
+  yum -y install yum-utils gfal2-all davix attr acl jq voms-clients-java  && \
+  yum -y install http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
 
 COPY assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
 COPY assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
@@ -31,12 +36,6 @@ COPY assets/usercert/usercert.pem /home/storm/.globus/usercert.pem
 COPY assets/usercert/userkey.pem /home/storm/.globus/userkey.pem
 COPY assets/usercert/user.p12 /home/storm/usercred.p12
 COPY assets/oidc-agent/ /home/storm/.oidc-agent/
-
-RUN \
-  yum -y install redhat-lsb-core wget git tar && \
-  #yum -y update && \
-  yum -y install yum-utils gfal2-all davix attr acl jq voms-clients-java  && \
-  yum -y install http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
 
 RUN chown -R storm:storm /home/storm/
 

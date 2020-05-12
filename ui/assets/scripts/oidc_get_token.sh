@@ -6,6 +6,6 @@ fi
 
 export CLIENT=
 
-./oidc_expect.sh
+../ui/assets/scripts/oidc_expect.sh
 
 export SUBJECT_TOKEN=$(oidc-token $CLIENT)

@@ -1,1 +1,1 @@
-0 * * * * /startup.sh
+0 * * * * /oidc_get_token.sh

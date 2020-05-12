@@ -1,9 +1,16 @@
 # User interface
 The user interface container provides the utilities to create a VOMS proxy (voms-clients-java) or request a token (oidc-agent).
-In order to work few modification must be done on the docker-compose.yml file. The location of the user x509 certificate and the corresponding private key must be provided. The corresponding configuration file for the VO to be configured must be provided under the `vomses` and `vomsdir` folders. These folders contain reference example files.
-Since you have to open a browser from inside the docker container (required for IAM account or token exchange client registration with `oidc-agent`), in order to start the ui service just go to `xdc_http_cache/scripts`, run `configure_services.sh` selecting ui, and then, after building the docker image in `xdc_http_cache/ui`, run `connect_ui.sh`:
+Service configuration can be done moving to `xdc_http_cache/scripts`, running `configure_services.sh`, selecting ui and following the instructions provided by the script.
+In order for VOMS authentication to work, the user x509 certificate and the corresponding private key (together with a .p12 format certificate) must be put in `xdc_http_cache/ui/assets/usercert`.
+Required files are :
+  - usercert.pem
+  - userkey.pem
+  - user.p12
+
+The .p12 certificate has to be imported in the browser, allowing the user to link the x509 certificate to his IAM account. 
+The configuration files for the VO to be configured should be provided under the `vomses` and `vomsdir` folders. These folders contain reference example files, properly configurable by running `xdc_http_cache/scripts/configure_services.sh`.
+Since you have to open a browser from inside the docker container (required for IAM account or token exchange client registration with `oidc-agent`), in order to start the ui service just run `xdc_http_cache/ui/connect_ui.sh`:
 ```
-docker-compose build
 ./connect_ui.sh
 ```
 A VOMS proxy can be requested using the command:

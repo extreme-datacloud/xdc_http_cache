@@ -1,4 +1,6 @@
 #!/bin/bash
+xauth list > assets/scripts/xauth_list.log
+docker-compose build
 docker run \
    -it \
    --net host \
