@@ -1,4 +1,40 @@
 #!/bin/bash
+
+if ! [[ `rpm -qa | grep firefox` ]]; then
+    sudo yum install -y mesa-libGL
+    sudo yum install -y dbus-x11    
+    sudo yum install -y firefox
+fi
+if ! [[ `rpm -qa | grep bind-utils` ]]; then
+    sudo yum install -y bind-utils
+fi
+if ! [[ `rpm -qa | grep xauth` ]]; then
+    sudo yum install -y xauth
+fi
+if ! [[ `rpm -qa | grep jq` ]]; then
+    sudo yum install -y jq
+fi
+if ! [[ `rpm -qa | grep expect` ]]; then
+    sudo yum install -y expect
+fi
+if ! [[ `rpm -qa | grep xdg-utils` ]]; then
+    sudo yum install -y xdg-utils
+fi
+if ! [[ `rpm -qa | grep oidc-agent` ]]; then
+    sudo yum install -y http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
+fi
+if ! [[ `ls /etc/grid-security/certificates` ]]; then
+    sudo cp ../ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
+    sudo yum install -y ca-policy-egi-core fetch-crl sharutils
+fi
+if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem` ]]; then
+    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
+fi
+if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem` ]]; then
+    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+fi
+sudo update-ca-trust
+
 printf 'Enter the service to be configured [ iam | ui | cache | storm-webdav | dynafed ]: '
 read -r service
 if [ -n $service ] ; then
@@ -25,7 +61,7 @@ if [ -n $service ] ; then
         lsc_file=$(ls ../ui/assets/vomsdir/indigo-dc)
         lsc_file=${lsc_file%".lsc"}
 
-        if ! [ "$HOSTNAME" = "$lsc_file" ]; then
+        if ! [ "$iam_hostname" = "$lsc_file" ]; then
             mv ../ui/assets/vomsdir/indigo-dc/*.lsc ../ui/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi
 
@@ -47,7 +83,7 @@ if [ -n $service ] ; then
         lsc_file=$(ls ../storage/cache/assets/vomsdir/indigo-dc)
         lsc_file=${lsc_file%".lsc"}
 
-        if ! [ "$HOSTNAME" = "$lsc_file" ]; then
+        if ! [ "$iam_hostname" = "$lsc_file" ]; then
             mv ../storage/cache/assets/vomsdir/indigo-dc/*.lsc ../storage/cache/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi
 
@@ -73,7 +109,7 @@ if [ -n $service ] ; then
         lsc_file=$(ls ../storage/storm-webdav/assets/vomsdir/indigo-dc)
         lsc_file=${lsc_file%".lsc"}
 
-        if ! [ "$HOSTNAME" = "$lsc_file" ]; then
+        if ! [ "$iam_hostname" = "$lsc_file" ]; then
             mv ../storage/storm-webdav/assets/vomsdir/indigo-dc/*.lsc ../storage/storm-webdav/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi        
 
@@ -108,7 +144,7 @@ if [ -n $service ] ; then
         lsc_file=$(ls ../dynafed/assets/vomsdir/indigo-dc)
         lsc_file=${lsc_file%".lsc"}
 
-        if ! [ "$HOSTNAME" = "$lsc_file" ]; then
+        if ! [ "$iam_hostname" = "$lsc_file" ]; then
             mv ../dynafed/assets/vomsdir/indigo-dc/*.lsc ../dynafed/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi
 
@@ -117,37 +153,6 @@ if [ -n $service ] ; then
         sed -i 's/\(\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN=\)\(.*\)/\1'"$iam_hostname"'/g' \
             ../dynafed/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         
-        if ! [[ `rpm -qa | grep firefox` ]]; then
-            sudo yum install -y mesa-libGL
-            sudo yum install -y dbus-x11    
-            sudo yum install -y firefox
-        fi
-        if ! [[ `rpm -qa | grep bind-utils` ]]; then
-            sudo yum install -y bind-utils
-        fi
-        if ! [[ `rpm -qa | grep jq` ]]; then
-            sudo yum install -y jq
-        fi
-        if ! [[ `rpm -qa | grep expect` ]]; then
-            sudo yum install -y expect
-        fi
-        if ! [[ `rpm -qa | grep xdg-utils` ]]; then
-            sudo yum install -y xdg-utils
-        fi
-        if ! [[ `rpm -qa | grep oidc-agent` ]]; then
-            sudo yum install -y http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
-        fi
-        if ! [[ `ls /etc/grid-security/certificates` ]]; then
-            sudo cp ../ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
-            sudo yum install -y ca-policy-egi-core fetch-crl sharutils
-        fi
-        if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem` ]]; then
-            sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
-        fi
-        if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem` ]]; then
-            sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-        fi
-        sudo update-ca-trust
         printf '\nPlease, register an IAM account for Dynafed. Opening Firefox...\n'
         firefox https://$iam_hostname/
         printf '\nNow, register a token exchange client for Dynafed. Starting oidc-agent...\n'
@@ -155,12 +160,14 @@ if [ -n $service ] ; then
         source ../dynafed/assets/register_client.sh
         printf 'Finally, enter encryption Password for the last time: '
         read -rs client_passphrase
-        client_name=$(ls -l ~/.oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}')
+        client_name=$((ls -l ~/.oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}'))
         client_id=$(oidc-gen --pw-cmd="echo "$client_passphrase --print "$client_name" | jq '.client_id')
         client_secret=$(oidc-gen --pw-cmd="echo "$client_passphrase --print "$client_name" | jq '.client_secret')
         oidc-agent --kill 2>&1 > /dev/null
-        cp ~/.oidc-agent/* ../dynafed/assets/oidc-agent/
+        cp -a ~/.oidc-agent/ ../dynafed/assets/
+        cp -a ~/.config/oidc-agent/ ../dynafed/assets/
         rm -rf ~/.oidc-agent/*
+        rm -rf ~/.config/oidc-agent/*
 
         sed -i 's/\(ENV CLIENT_ID=\)\(.*\)/\1'"$client_id"'/g' ../dynafed/assets/Dockerfile
         sed -i 's/\(ENV CLIENT_SECRET=\)\(.*\)/\1'"$client_secret"'/g' ../dynafed/assets/Dockerfile

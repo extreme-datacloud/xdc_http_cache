@@ -21,7 +21,7 @@ The repository is splitted in folders with at least one service setup docker-com
 * storage (Cache and Storm WebDAV service )
 * dynafed (dynafed federator service)
 
-Each service can be started from the relevant folder with following commands:
+Each service (apart from ui) can be started from the relevant folder with following commands:
 ```
 docker-compose build
 docker-compose up -d
