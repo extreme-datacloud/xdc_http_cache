@@ -1,1 +1,1 @@
-0 * * * * /oidc_get_token.sh
+0 * * * * /cronjob.sh

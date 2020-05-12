@@ -81,6 +81,7 @@ COPY dynafed/assets/trust-anchors/igi-test-ca.pem /etc/grid-security/certificate
 COPY dynafed/assets/certs/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
 COPY dynafed/assets/trust-anchors/igi-test-ca.pem /etc/pki/ca-trust/source/anchors/
 
+COPY dynafed/assets/cronjob.sh /cronjob.sh
 COPY dynafed/assets/crontab /var/spool/cron/token_cronjob
 RUN chmod 0644 /var/spool/cron/token_cronjob && \
     crontab /var/spool/cron/token_cronjob && \

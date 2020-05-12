@@ -89,8 +89,19 @@ if [ -n $service ] ; then
 
         source ../ui/assets/scripts/oidc_get_token.sh
         source ../ui/assets/scripts/get_userinfo.sh
-
-        printf '%s .indigo-dc' "$SUBJECT_HASH" > grid-mapfile
+      
+        if [ -f grid-mapfile ]; then
+            cp /dev/null grid-mapfile
+        else
+            touch grid-mapfile
+        fi
+	if [ -f ../ui/assets/usercert/usercert.pem ]; then
+            DN=$(openssl x509 -in ../ui/assets/usercert/usercert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
+            printf '"%s" .indigo-dc\n' "$DN" >> grid-mapfile
+        else
+            printf '\nWarning: could not find x509 cert, user DN not added to grid-mapfile!\n'
+        fi
+	printf '%s .indigo-dc' "$SUBJECT_HASH" >> grid-mapfile
 
         oidc-agent --kill 2>&1 > /dev/null
         rm -rf ~/.oidc-agent/*
