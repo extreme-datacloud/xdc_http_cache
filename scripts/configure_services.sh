@@ -51,6 +51,15 @@ if [ -n $service ] ; then
             mv ../iam/assets/vomsdir/indigo-dc/*.lsc ../iam/assets/vomsdir/indigo-dc/"$HOSTNAME".lsc
         fi
 
+        if [ -f ../certs/hostcert.pem ]; then
+            HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
+            HOST_ISSUER=$(openssl x509 -in ../certs/hostcert.pem -noout -issuer | awk 'sub("^" $1 FS, _)')
+            printf '%s\n%s\n' "$HOST_DN" "$HOST_ISSUER" > ../iam/assets/vomsdir/indigo-dc/"$HOSTNAME".lsc
+        else
+            printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
+            exit 1
+        fi
+
         if [ -f ../ui/assets/usercert/usercert.pem ]; then
             cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../iam/assets/certs/digicert/Fullchain.pem
         else
@@ -71,11 +80,18 @@ if [ -n $service ] ; then
             mv ../ui/assets/vomsdir/indigo-dc/*.lsc ../ui/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi
 
+	if [ -f ../certs/hostcert.pem ]; then
+            HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
+            HOST_ISSUER=$(openssl x509 -in ../certs/hostcert.pem -noout -issuer | awk 'sub("^" $1 FS, _)')
+            printf '%s\n%s\n' "$HOST_DN" "$HOST_ISSUER" > ../ui/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
+        else
+            printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
+            exit 1
+        fi
+
         sed -i 's/\(ENV UID=\)\(.*\)/\1'"$(id -u)"'/g' ../ui/assets/docker/Dockerfile
-        sed -i 's/\(\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN=\)\(.*\)/\1'"$iam_hostname"'/g' \
-            ../ui/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
-        sed -i 's/\("indigo-dc" "\)\(.*\)/\1'"$iam_hostname"'" "15000" "\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN='"$iam_hostname"'" "indigo-dc"/g' \
-            ../ui/assets/vomses/indigo-dc
+        ESCAPED_HOST_DN=$(echo "$HOST_DN" | sed 's/\//\\\//g')
+        sed -i 's/\("indigo-dc" "\)\(.*\)/\1'"$iam_hostname"'" "15000" "'"$ESCAPED_HOST_DN"'" "indigo-dc"/g' ../ui/assets/vomses/indigo-dc
         sed -i 's/\(IAM_USERINFO_ENDPOINT:-https:\/\/\)\(.*\)/\1'"$iam_hostname"'\/userinfo})/g' ../ui/assets/scripts/get_userinfo.sh
 
         printf '\nPlease, register an IAM account for your user. Opening Firefox...\n'
@@ -89,9 +105,10 @@ if [ -n $service ] ; then
         if [ -d ~/.oidc-agent/ ]; then
             cp -a ~/.oidc-agent/. ../ui/assets/oidc-agent/
         fi
-	if [ -d ~/.config/oidc-agent/ ]; then
+        if [ -d ~/.config/oidc-agent/ ]; then
             cp -a ~/.config/oidc-agent/ ../ui/assets/
         fi
+
         sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../ui/assets/scripts/oidc_get_token.sh
         sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../ui/assets/scripts/oidc_expect.sh
         sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../ui/assets/scripts/oidc_expect.sh
@@ -110,7 +127,7 @@ if [ -n $service ] ; then
         else
             printf '\nWarning: could not find x509 cert, user DN not added to grid-mapfile!\n'
         fi
-	printf '%s .indigo-dc' "$SUBJECT_HASH" >> grid-mapfile
+	printf '%s .indigo-dc\n' "$SUBJECT_HASH" >> grid-mapfile
 
         oidc-agent --kill 2>&1 > /dev/null
         rm -rf ~/.oidc-agent/*
@@ -138,10 +155,17 @@ if [ -n $service ] ; then
             mv ../storage/cache/assets/vomsdir/indigo-dc/*.lsc ../storage/cache/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi
 
+        if [ -f ../certs/hostcert.pem ]; then
+            HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
+            HOST_ISSUER=$(openssl x509 -in ../certs/hostcert.pem -noout -issuer | awk 'sub("^" $1 FS, _)')
+            printf '%s\n%s\n' "$HOST_DN" "$HOST_ISSUER" > ../storage/cache/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
+        else
+            printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
+       	    exit 1
+        fi
+
         sed -i 's/\(        server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../storage/cache/assets/docker/nginx.conf 
         sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../storage/cache/assets/docker/Dockerfile
-        sed -i 's/\(\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN=\)\(.*\)/\1'"$iam_hostname"'/g' \
-            ../storage/cache/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         sed -i 's/\(discovery = "https:\/\/\)\(.*\)/\1'"$iam_hostname"'\/.well-known\/openid-configuration",/g' ../storage/cache/assets/docker/nginx.conf
         printf '\nEnter StoRM-WebDAV hostname: '
         read -r storm_hostname
@@ -149,7 +173,7 @@ if [ -n $service ] ; then
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/cache/assets/docker/replace_iam_ip.sh
-        
+
         if [ -f ../ui/assets/usercert/usercert.pem ]; then
             cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../storage/cache/assets/certs/digicert/Fullchain.pem
         else
@@ -170,11 +194,17 @@ if [ -n $service ] ; then
             mv ../storage/storm-webdav/assets/vomsdir/indigo-dc/*.lsc ../storage/storm-webdav/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi        
 
+        if [ -f ../certs/hostcert.pem ]; then
+            HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
+            HOST_ISSUER=$(openssl x509 -in ../certs/hostcert.pem -noout -issuer | awk 'sub("^" $1 FS, _)')
+            printf '%s\n%s\n' "$HOST_DN" "$HOST_ISSUER" > ../storage/storm-webdav/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
+            printf '"%s"\n' "$HOST_DN" > ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
+        else
+            printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
+            exit 1
+       	fi
+
         sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../storage/storm-webdav/assets/docker/storm-webdav/Dockerfile
-        sed -i 's/\(\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN=\)\(.*\)/\1'"$iam_hostname"'/g' \
-            ../storage/storm-webdav/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
-        sed -i 's/\(\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN=\)\(.*\)/\1'"$iam_hostname"'"/g' \
-            ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
         sed -i 's/\(orgs=https:\/\/\)\(.*\)/\1'"$iam_hostname"'\//g' ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/sa.d/indigo-dc.properties
         sed -i 's/\(issuer: https:\/\/\)\(.*\)/\1'"$iam_hostname"'\//g' ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/config/application.yml
         sed -i 's/\(- name:\)\(.*\)/\1'" $iam_hostname"'/g' ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/config/application.yml
@@ -188,15 +218,14 @@ if [ -n $service ] ; then
             printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by StoRM-WebDAV!\n'
         fi
 
-        if [ -f cache_hosts.log ]; then
-            for i in `cat cache_hosts.log`
+        if [ -f cache_dns.log ]; then
+            while IFS= read -r line
             do
-                printf '"/DC=org/DC=terena/DC=tcs/C=IT/L=Frascati/O=Istituto Nazionale di Fisica Nucleare/CN=%s"\n' \
-                    "$i" >> ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
-            done
+                printf '"%s"\n' "$line" >> ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
+            done < "cache_dns.log"
             printf '\nstorm-webdav service successfully configured!\n'
         else
-            printf '\nWarning: dynafed service not yet configured, could not add cache hosts to vomap file!\n'
+            printf '\nWarning: dynafed service not yet configured, could not add cache host DNs to vomap file!\n'
         fi
         ;;
 
@@ -211,10 +240,17 @@ if [ -n $service ] ; then
             mv ../dynafed/assets/vomsdir/indigo-dc/*.lsc ../dynafed/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         fi
 
+        if [ -f ../certs/hostcert.pem ]; then
+            HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
+            HOST_ISSUER=$(openssl x509 -in ../certs/hostcert.pem -noout -issuer | awk 'sub("^" $1 FS, _)')
+            printf '%s\n%s\n' "$HOST_DN" "$HOST_ISSUER" > ../dynafed/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
+        else
+            printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
+            exit 1
+        fi
+
         sed -i 's/\(  ServerName\)\(.*\)/\1'" $HOSTNAME"'/g' ../dynafed/assets/zlcgdm-ugr-dav.conf 
         sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\(\/DC=org\/DC=terena\/DC=tcs\/C=IT\/L=Frascati\/O=Istituto Nazionale di Fisica Nucleare\/CN=\)\(.*\)/\1'"$iam_hostname"'/g' \
-            ../dynafed/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
         
         printf '\nPlease, register an IAM account for Dynafed. Opening Firefox...\n'
         firefox https://$iam_hostname/
@@ -255,7 +291,10 @@ if [ -n $service ] ; then
         done
 
         declare -a endpoint_urls
-        declare -a endpoint_hosts
+        declare -a endpoint_dns
+
+        DN_FIELDS=$(printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n' "C" "CN" "DC" "L" "O" "OU" "ST")
+        echo "$DN_FIELDS" > "dn_fields"
 
         for i in $(seq 1 $num_endpoints)
         do
@@ -270,28 +309,39 @@ if [ -n $service ] ; then
             done
             endpoint_urls+=("$u")
 
-            proto="$(echo ${u} | grep :// | sed -e's,^\(.*://\).*,\1,g')"
-            url=$(echo ${u} | sed -e s,$proto,,g)
-            hostport=$(echo $url | sed -e s,$user@,,g | cut -d/ -f1)
-            host="$(echo $hostport | sed -e 's,:.*,,g')"
+            printf '\nEnter endpoint'"'"'s DN n. '"$i"': '
+            read -r dn
+            DN_CONTENT=$(echo "$dn" | grep -oE '([^\/]|\\.)*' | awk -F' *= *' '{print $1}' | sort -u)
+            echo "$DN_CONTENT" > "dn_content"
+            while ! [[ `comm -13 <(sort -u dn_fields) <(sort -u dn_content) | wc -l` == "0" ]]
+            do
+                printf '\nDN not valid'
+                printf '\nEnter endpoint'"'"'s DN n. '"$i"': '
+                read -r dn
+                DN_CONTENT=$(echo "$dn" | grep -oE '([^\/]|\\.)*' | awk -F' *= *' '{print $1}' | sort -u)
+                echo "$DN_CONTENT" > "dn_content"
+            done
 
-            endpoint_hosts+=("$host")    
+            endpoint_dns+=("$dn")    
         done
 
-        hosts_unique=()
+        rm -f dn_fields
+        rm -f dn_content
+
+        dns_unique=()
         while IFS= read -r -d '' x
         do
-            hosts_unique+=("$x")
-        done < <(printf "%s\0" "${endpoint_hosts[@]}" | sort -uz)
+            dns_unique+=("$x")
+        done < <(printf "%s\0" "${endpoint_dns[@]}" | sort -uz)
 
-        if [ -f cache_hosts.log ]; then
-            cp /dev/null cache_hosts.log
+        if [ -f cache_dns.log ]; then
+            cp /dev/null cache_dns.log
         else
-            touch cache_hosts.log            
+            touch cache_dns.log            
         fi
-        for i in "${hosts_unique[@]}"
+        for i in "${dns_unique[@]}"
         do
-            printf '%s\n' "$i" >> cache_hosts.log
+            printf '%s\n' "$i" >> cache_dns.log
         done
 
         cp /dev/null ../dynafed/assets/endpoints.conf
