@@ -5,4 +5,4 @@ Required files are :
   - hostcert.pem
   - hostkey.pem
 
-Note that the certificate must be issued by TERENA DigiCert for the services to work.
+Note that the certificate must be issued by [TERENA eScience SSL CA 3](https://www.digicert.com/digicert-root-community-certificates.htm) for the services to work.
