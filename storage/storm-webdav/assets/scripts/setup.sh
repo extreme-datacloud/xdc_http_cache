@@ -10,6 +10,5 @@ sudo mkdir -p /etc/grid-security/vomsdir
 sudo cp -r /vomsdir/* /etc/grid-security/vomsdir
 
 # Setup CA CERTS
-sudo cp /trust-anchors/igi-test-ca.pem /etc/grid-security/certificates/
 sudo cp /digicert/FullchainHost.pem /etc/grid-security/certificates/
 sudo cp /digicert/Fullchain.pem /etc/grid-security/certificates/

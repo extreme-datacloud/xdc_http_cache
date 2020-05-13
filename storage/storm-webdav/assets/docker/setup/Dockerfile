@@ -5,7 +5,6 @@ USER root
 COPY certs/hostcert.pem /certs/
 COPY certs/hostkey.pem /certs/
 COPY storage/storm-webdav/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
-COPY storage/storm-webdav/assets/trust-anchors /trust-anchors
 
 RUN yum install ca-policy-egi-core fetch-crl -y
 

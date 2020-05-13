@@ -35,7 +35,7 @@ if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem` ]]; then
 fi
 sudo update-ca-trust
 
-printf 'Enter the service to be configured [ iam | ui | cache | storm-webdav | dynafed ]: '
+printf 'Enter the service to be configured [ iam | ui | cache | dynafed | storm-webdav ]: '
 read -r service
 if [ -n $service ] ; then
     case $service in
@@ -49,6 +49,12 @@ if [ -n $service ] ; then
 
         if ! [ "$HOSTNAME" = "$lsc_file" ]; then
             mv ../iam/assets/vomsdir/indigo-dc/*.lsc ../iam/assets/vomsdir/indigo-dc/"$HOSTNAME".lsc
+        fi
+
+        if [ -f ../ui/assets/usercert/usercert.pem ]; then
+            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../iam/assets/certs/digicert/Fullchain.pem
+        else
+            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by IAM!\n'
         fi
 
         printf '\niam service successfully configured!\n' 
@@ -79,14 +85,17 @@ if [ -n $service ] ; then
         source ../ui/assets/scripts/register_client.sh
         printf 'Finally, enter encryption Password for the last time: '
         read -rs client_passphrase
-        client_name=$((ls -l ~/.oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}'))
-        cp -a ~/.oidc-agent/. ../ui/assets/oidc-agent/
-        cp -a ~/.config/oidc-agent/ ../ui/assets/
-
+        client_name=$((ls -l ~/.oidc-agent/ 2>/dev/null | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ 2>/dev/null | grep -v issuer.config | awk '{if(NR>1)print $9}'))
+        if [ -d ~/.oidc-agent/ ]; then
+            cp -a ~/.oidc-agent/. ../ui/assets/oidc-agent/
+        fi
+	if [ -d ~/.config/oidc-agent/ ]; then
+            cp -a ~/.config/oidc-agent/ ../ui/assets/
+        fi
         sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../ui/assets/scripts/oidc_get_token.sh
         sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../ui/assets/scripts/oidc_expect.sh
         sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../ui/assets/scripts/oidc_expect.sh
-
+        printf '\n'
         source ../ui/assets/scripts/oidc_get_token.sh
         source ../ui/assets/scripts/get_userinfo.sh
       
@@ -109,6 +118,12 @@ if [ -n $service ] ; then
 
         xauth list > ../ui/assets/scripts/xauth_list.log
         
+        if [ -f ../ui/assets/usercert/usercert.pem ]; then
+            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../ui/assets/certs/digicert/Fullchain.pem
+        else
+            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected!\n'
+        fi
+
         printf '\nui service successfully configured!\n'
         ;;
 
@@ -135,6 +150,12 @@ if [ -n $service ] ; then
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/cache/assets/docker/replace_iam_ip.sh
         
+        if [ -f ../ui/assets/usercert/usercert.pem ]; then
+            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../storage/cache/assets/certs/digicert/Fullchain.pem
+        else
+            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by cache!\n'
+        fi
+
         printf '\ncache service successfully configured!\n'
         ;;
 
@@ -160,6 +181,12 @@ if [ -n $service ] ; then
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/storm-webdav/assets/scripts/replace_iam_ip.sh
+
+        if [ -f ../ui/assets/usercert/usercert.pem ]; then
+            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../storage/storm-webdav/assets/certs/digicert/Fullchain.pem
+        else
+            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by StoRM-WebDAV!\n'
+        fi
 
         if [ -f cache_hosts.log ]; then
             for i in `cat cache_hosts.log`
@@ -196,12 +223,18 @@ if [ -n $service ] ; then
         source ../dynafed/assets/register_client.sh
         printf 'Finally, enter encryption Password for the last time: '
         read -rs client_passphrase
-        client_name=$((ls -l ~/.oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ | grep -v issuer.config | awk '{if(NR>1)print $9}'))
+        client_name=$((ls -l ~/.oidc-agent/ 2>/dev/null | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ 2>/dev/null | grep -v issuer.config | awk '{if(NR>1)print $9}'))
         client_id=$(oidc-gen --pw-cmd="echo "$client_passphrase --print "$client_name" | jq '.client_id')
         client_secret=$(oidc-gen --pw-cmd="echo "$client_passphrase --print "$client_name" | jq '.client_secret')
         oidc-agent --kill 2>&1 > /dev/null
-        cp -a ~/.oidc-agent/. ../dynafed/assets/oidc-agent/
-        cp -a ~/.config/oidc-agent/ ../dynafed/assets/
+
+        if [ -d ~/.oidc-agent/ ]; then
+            cp -a ~/.oidc-agent/. ../dynafed/assets/oidc-agent/
+        fi
+	if [ -d ~/.config/oidc-agent/ ]; then
+            cp -a ~/.config/oidc-agent/ ../dynafed/assets/
+        fi
+
         rm -rf ~/.oidc-agent/*
         rm -rf ~/.config/oidc-agent/*
 
@@ -288,6 +321,12 @@ locplugin.LOCAL-WEBDAV-%s.xlatepfx: /indigo-dc/ /\n\n' \
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../dynafed/assets/replace_iam_ip.sh
         
+        if [ -f ../ui/assets/usercert/usercert.pem ]; then
+            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../dynafed/assets/certs/Fullchain.pem
+        else
+            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by DynaFed!\n'
+        fi
+
         if [ -f grid-mapfile ]; then
             cat grid-mapfile >> ../dynafed/assets/grid-mapfile
             printf '\ndynafed service successfully configured!\n'

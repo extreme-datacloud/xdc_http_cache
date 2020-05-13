@@ -59,7 +59,7 @@ RUN sed -i 's/LoadModule dav/#LoadModule dav/g' /etc/httpd/conf/httpd.conf \
   && sed -i "s@$(echo $secret_old | sed 's/\./\\./g')@$secret_new@g" /etc/httpd/conf.d/auth_openidc.conf \
   && export passphrase_old=client.passphrase \
   && export passphrase_new=$CLIENT_PASSPHRASE \
-  && sed -i "s@$(echo $passphrase_old | sed 's/\./\\./g')@$passphrase_new@g" /etc/httpd/conf.d/auth_openidc.conf
+  && sed -i "s/$(echo $passphrase_old | sed 's/\./\\./g')/$passphrase_new/g" /etc/httpd/conf.d/auth_openidc.conf
 
 RUN mkdir -p /myfed/indigo-dc
 RUN chown -R apache:apache /myfed
@@ -77,9 +77,9 @@ RUN chmod +x /etc/ugr/conf.d/ugrauth_gridmap.py
 COPY dynafed/assets/local_python.sh /etc/profile.d/local_python.sh
 COPY dynafed/assets/startup.sh /startup.sh
 COPY dynafed/assets/certs/FullchainHost.pem /etc/grid-security/certificates
-COPY dynafed/assets/trust-anchors/igi-test-ca.pem /etc/grid-security/certificates/
+COPY dynafed/assets/certs/Fullchain.pem /etc/grid-security/certificates/
 COPY dynafed/assets/certs/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-COPY dynafed/assets/trust-anchors/igi-test-ca.pem /etc/pki/ca-trust/source/anchors/
+COPY dynafed/assets/certs/Fullchain.pem /etc/pki/ca-trust/source/anchors/
 
 COPY dynafed/assets/cronjob.sh /cronjob.sh
 COPY dynafed/assets/crontab /var/spool/cron/token_cronjob

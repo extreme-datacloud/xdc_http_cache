@@ -5,7 +5,7 @@ if [[ -z ${SUBJECT_TOKEN} ]]; then
   exit 1
 fi
 
-userinfo=$(curl -s -L -H "Authorization: Bearer ${SUBJECT_TOKEN}" ${IAM_USERINFO_ENDPOINT:-https://ds-303.cr.cnaf.infn.it/userinfo})
+userinfo=$(curl -s -L -H "Authorization: Bearer ${SUBJECT_TOKEN}" ${IAM_USERINFO_ENDPOINT:-https:///userinfo})
 
 if [[ $? != 0 ]]; then
   echo "Error!"
@@ -13,4 +13,4 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 
-echo $userinfo | jq '.sub'
+export SUBJECT_HASH=$(echo $userinfo | jq '.sub')

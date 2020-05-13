@@ -6,7 +6,7 @@ USER root
 
 RUN yum install -y java-1.8.0-openjdk-devel
 
-COPY storage/storm-webdav/assets/trust-anchors/igi-test-ca.pem /etc/pki/ca-trust/source/anchors/igi-test-ca.pem
+COPY storage/storm-webdav/assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/Fullchain.pem
 COPY storage/storm-webdav/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/FullchainHost.pem
 
 COPY storage/storm-webdav/assets/storm-webdav/etc/sysconfig/storm-webdav /etc/sysconfig/storm-webdav

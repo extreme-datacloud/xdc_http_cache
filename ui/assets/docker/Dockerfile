@@ -21,7 +21,6 @@ COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/grid-security/cert
 COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/pki/ca-trust/source/anchors/
 COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/pki/ca-trust/source/anchors/
 COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/grid-security/certificates/
-COPY assets/trust-anchors /trust-anchors
 COPY assets/certs/digicert /digicert
 COPY assets/vomsdir /etc/grid-security/vomsdir
 COPY assets/vomses /etc/vomses

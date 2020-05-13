@@ -30,6 +30,6 @@ If iam-be service is able to setup and run, it means that the iam-be host regist
 docker-compose up
 ```
 After building the container and running the services, in order to complete the setup, the user certificates must be added to the corresponding IAM account, so that IAM in turn will be able to generate the VOMS proxy when contacted. This can be be done on a per-user basis and adding the user to a group whose name matches the name of the VO.
-
-
-
+Please, notice that IAM administrator credentials are the following:
+  - username: `admin`
+  - password: `password`
