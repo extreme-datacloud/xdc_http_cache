@@ -35,7 +35,7 @@ if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem` ]]; then
 fi
 sudo update-ca-trust
 
-printf 'Enter the service to be configured [ iam | ui | cache | dynafed | storm-webdav ]: '
+printf 'Enter the service to be configured (please, follow the order) [ iam | ui | cache | dynafed | storm-webdav ]: '
 read -r service
 if [ -n $service ] ; then
     case $service in
@@ -167,9 +167,6 @@ if [ -n $service ] ; then
         sed -i 's/\(        server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../storage/cache/assets/docker/nginx.conf 
         sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../storage/cache/assets/docker/Dockerfile
         sed -i 's/\(discovery = "https:\/\/\)\(.*\)/\1'"$iam_hostname"'\/.well-known\/openid-configuration",/g' ../storage/cache/assets/docker/nginx.conf
-        printf '\nEnter StoRM-WebDAV hostname: '
-        read -r storm_hostname
-        sed -i 's/\(ngx.var.proxy = '"'"'\)\(.*\)/\1'"$storm_hostname"':11443'"'"';/g' ../storage/cache/assets/docker/nginx.conf
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/cache/assets/docker/replace_iam_ip.sh
@@ -179,6 +176,50 @@ if [ -n $service ] ; then
         else
             printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by cache!\n'
         fi
+
+        printf '\nHow many cache instances are you going to deploy on this host? '
+        read -r num_endpoints
+        re='^[0-9]+$'
+        while ! [[ $num_endpoints =~ $re ]] ; do
+            printf '\nerror: Not a number\n' >&2
+            printf '\nHow many cache instances are you going to deploy on this host? '
+            read -r num_endpoints
+        done
+
+        p_min=1000
+
+        for i in $(seq 1 $num_endpoints)
+        do
+            cp -a ../storage/cache ../storage/cache_"$i"
+
+            printf '\nEnter cache'"'"'s port for cache n. '"$i"': '
+            read -r cache_port
+            while ! [[ $cache_port =~ $re && "$cache_port" -gt "$p_min" ]]
+            do
+                printf '\nport not valid\n'
+                printf '\nEnter cache'"'"'s port for cache n. '"$i"': '
+                read -r cache_port
+            done
+
+            sed -i 's/\(EXPOSE\)\(.*\)/\1'" $cache_port"'/g' ../storage/cache_"$i"/assets/docker/Dockerfile
+            sed -i 's/\(        listen\)\(.*\)/\1'" $cache_port"' ssl;/g' ../storage/cache_"$i"/assets/docker/nginx.conf
+            sed -i 's/\(      - "\)\(.*\)/\1'"$cache_port"':'"$cache_port"'"/g' ../storage/cache_"$i"/docker-compose.yml
+
+            printf '\nEnter StoRM-WebDAV hostname for cache n. '"$i"': '
+            read -r storm_hostname
+
+            printf '\nEnter StoRM-WebDAV'"'"'s port for cache n. '"$i"': '
+            read -r storm_port
+            while ! [[ $storm_port =~ $re && "$storm_port" -gt "$p_min" ]]
+            do
+              	printf '\nport not valid\n'
+                printf '\nEnter StoRM-WebDAV'"'"'s port for cache n. '"$i"': '
+                read -r storm_port
+            done
+
+            sed -i 's/\(ngx.var.proxy = '"'"'\)\(.*\)/\1'"$storm_hostname"':'"$storm_port"''"'"';/g' ../storage/cache_"$i"/assets/docker/nginx.conf
+            
+        done
 
         printf '\ncache service successfully configured!\n'
         ;;
@@ -217,6 +258,50 @@ if [ -n $service ] ; then
         else
             printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by StoRM-WebDAV!\n'
         fi
+
+        printf '\nHow many StoRM-WebDAV instances are you going to deploy on this host? '
+        read -r num_endpoints
+        re='^[0-9]+$'
+        while ! [[ $num_endpoints =~ $re ]] ; do
+            printf '\nerror: Not a number\n' >&2
+            printf '\nHow many StoRM-WebDAV instances are you going to deploy on this host? '
+            read -r num_endpoints
+        done
+
+        p_min=1000
+
+	for i in $(seq 1 $num_endpoints)
+        do
+            cp -a ../storage/storm-webdav ../storage/storm-webdav_"$i"
+
+            printf '\nEnter StoRM-WebDAV'"'"'s HTTP port for instance n. '"$i"': '
+            read -r storm_port
+            while ! [[ $storm_port =~ $re && "$storm_port" -gt "$p_min" ]]
+            do
+              	printf '\nport not valid\n'
+                printf '\nEnter StoRM-WebDAV'"'"'s HTTP port for instance n. '"$i"': '
+                read -r storm_port
+            done
+
+            sed -i 's/\(STORM_WEBDAV_HTTP_PORT=\)\(.*\)/\1'"$storm_port"'/g' ../storage/storm-webdav_"$i"/assets/storm-webdav/etc/sysconfig/storm-webdav
+            sed -i 's/\(      STORM_WEBDAV_HTTP_PORT:\)\(.*\)/\1'" $storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
+            sed -i 's/11085/'"$storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
+
+            printf '\nEnter StoRM-WebDAV'"'"'s HTTPS port for instance n. '"$i"': '
+            read -r storm_port
+            while ! [[ $storm_port =~ $re && "$storm_port" -gt "$p_min" ]]
+            do
+              	printf '\nport not valid\n'
+                printf '\nEnter StoRM-WebDAV'"'"'s HTTPS port for instance n. '"$i"': '
+                read -r storm_port
+            done
+
+            sed -i 's/\(STORM_WEBDAV_HTTPS_PORT=\)\(.*\)/\1'"$storm_port"'/g' ../storage/storm-webdav_"$i"/assets/storm-webdav/etc/sysconfig/storm-webdav
+            sed -i 's/\(      STORM_WEBDAV_HTTPS_PORT:\)\(.*\)/\1'" $storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
+            sed -i 's/11443/'"$storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
+            sed -i 's/1/'"$i"'/g' ../storage/storm-webdav_"$i"/assets/scripts/init-storage.sh
+
+        done
 
         if [ -f cache_dns.log ]; then
             while IFS= read -r line
@@ -303,7 +388,7 @@ if [ -n $service ] ; then
             regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
             while ! [[ $u =~ $regex ]]
             do
-      	        printf '\nURL not valid'
+      	        printf '\nURL not valid\n'
                 printf '\nEnter endpoint'"'"'s URL n. '"$i"': '
                 read -r u
             done
@@ -315,7 +400,7 @@ if [ -n $service ] ; then
             echo "$DN_CONTENT" > "dn_content"
             while ! [[ `comm -13 <(sort -u dn_fields) <(sort -u dn_content) | wc -l` == "0" ]]
             do
-                printf '\nDN not valid'
+                printf '\nDN not valid\n'
                 printf '\nEnter endpoint'"'"'s DN n. '"$i"': '
                 read -r dn
                 DN_CONTENT=$(echo "$dn" | grep -oE '([^\/]|\\.)*' | awk -F' *= *' '{print $1}' | sort -u)
