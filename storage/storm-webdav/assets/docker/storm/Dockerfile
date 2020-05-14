@@ -9,7 +9,7 @@ RUN yum install -y java-1.8.0-openjdk-devel
 COPY storage/storm-webdav/assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/Fullchain.pem
 COPY storage/storm-webdav/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/FullchainHost.pem
 
-COPY storage/storm-webdav/assets/storm-webdav/etc/sysconfig/storm-webdav /etc/sysconfig/storm-webdav
+COPY storage/storm-webdav/assets/etc/sysconfig/storm-webdav /etc/sysconfig/storm-webdav
 
 RUN chown storm.storm -R /etc/pki && \
     mkdir storm-webdav-server && \

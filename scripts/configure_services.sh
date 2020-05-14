@@ -218,6 +218,7 @@ if [ -n $service ] ; then
             done
 
             sed -i 's/\(ngx.var.proxy = '"'"'\)\(.*\)/\1'"$storm_hostname"':'"$storm_port"''"'"';/g' ../storage/cache_"$i"/assets/docker/nginx.conf
+            find ../storage/cache_"$i" -type f -exec sed -i -e 's/cache\//cache_'"$i"'\//g' {} \;
             
         done
 
@@ -239,16 +240,16 @@ if [ -n $service ] ; then
             HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
             HOST_ISSUER=$(openssl x509 -in ../certs/hostcert.pem -noout -issuer | awk 'sub("^" $1 FS, _)')
             printf '%s\n%s\n' "$HOST_DN" "$HOST_ISSUER" > ../storage/storm-webdav/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
-            printf '"%s"\n' "$HOST_DN" > ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
+            printf '"%s"\n' "$HOST_DN" > ../storage/storm-webdav/assets/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
         else
             printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
             exit 1
        	fi
 
-        sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../storage/storm-webdav/assets/docker/storm-webdav/Dockerfile
-        sed -i 's/\(orgs=https:\/\/\)\(.*\)/\1'"$iam_hostname"'\//g' ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/sa.d/indigo-dc.properties
-        sed -i 's/\(issuer: https:\/\/\)\(.*\)/\1'"$iam_hostname"'\//g' ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/config/application.yml
-        sed -i 's/\(- name:\)\(.*\)/\1'" $iam_hostname"'/g' ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/config/application.yml
+        sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../storage/storm-webdav/assets/docker/storm/Dockerfile
+        sed -i 's/\(orgs=https:\/\/\)\(.*\)/\1'"$iam_hostname"'\//g' ../storage/storm-webdav/assets/etc/storm/webdav/sa.d/indigo-dc.properties
+        sed -i 's/\(issuer: https:\/\/\)\(.*\)/\1'"$iam_hostname"'\//g' ../storage/storm-webdav/assets/etc/storm/webdav/config/application.yml
+        sed -i 's/\(- name:\)\(.*\)/\1'" $iam_hostname"'/g' ../storage/storm-webdav/assets/etc/storm/webdav/config/application.yml
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/storm-webdav/assets/scripts/replace_iam_ip.sh
@@ -283,7 +284,7 @@ if [ -n $service ] ; then
                 read -r storm_port
             done
 
-            sed -i 's/\(STORM_WEBDAV_HTTP_PORT=\)\(.*\)/\1'"$storm_port"'/g' ../storage/storm-webdav_"$i"/assets/storm-webdav/etc/sysconfig/storm-webdav
+            sed -i 's/\(STORM_WEBDAV_HTTP_PORT=\)\(.*\)/\1'"$storm_port"'/g' ../storage/storm-webdav_"$i"/assets/etc/sysconfig/storm-webdav
             sed -i 's/\(      STORM_WEBDAV_HTTP_PORT:\)\(.*\)/\1'" $storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
             sed -i 's/11085/'"$storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
 
@@ -296,22 +297,25 @@ if [ -n $service ] ; then
                 read -r storm_port
             done
 
-            sed -i 's/\(STORM_WEBDAV_HTTPS_PORT=\)\(.*\)/\1'"$storm_port"'/g' ../storage/storm-webdav_"$i"/assets/storm-webdav/etc/sysconfig/storm-webdav
+            sed -i 's/\(STORM_WEBDAV_HTTPS_PORT=\)\(.*\)/\1'"$storm_port"'/g' ../storage/storm-webdav_"$i"/assets/etc/sysconfig/storm-webdav
             sed -i 's/\(      STORM_WEBDAV_HTTPS_PORT:\)\(.*\)/\1'" $storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
             sed -i 's/11443/'"$storm_port"'/g' ../storage/storm-webdav_"$i"/docker-compose.yml
             sed -i 's/1/'"$i"'/g' ../storage/storm-webdav_"$i"/assets/scripts/init-storage.sh
 
+            find ../storage/storm-webdav_"$i" -type f -not -path "*docker/storm*" -not -path "*scripts*" -not -path "*sysconfig*" -exec sed -i -e 's/storm-webdav\//storm-webdav_'"$i"'\//g' {} \;
+            sed -i 's/storage\/storm-webdav\//storage\/storm-webdav_'"$i"'\//g' ../storage/storm-webdav_"$i"/assets/docker/storm/Dockerfile
+
+            if [ -f cache_dns.log ]; then
+                while IFS= read -r line
+                do
+                    printf '"%s"\n' "$line" >> ../storage/storm-webdav_"$i"/assets/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
+                done < "cache_dns.log"
+            else
+                printf '\nWarning: dynafed service not yet configured, could not add cache host DNs to vomap files!\n'
+            fi
         done
 
-        if [ -f cache_dns.log ]; then
-            while IFS= read -r line
-            do
-                printf '"%s"\n' "$line" >> ../storage/storm-webdav/assets/storm-webdav/etc/storm/webdav/vo-mapfiles.d/indigo-dc.vomap
-            done < "cache_dns.log"
-            printf '\nstorm-webdav service successfully configured!\n'
-        else
-            printf '\nWarning: dynafed service not yet configured, could not add cache host DNs to vomap file!\n'
-        fi
+        printf '\nstorm-webdav service successfully configured!\n'
         ;;
 
       dynafed)
