@@ -18,10 +18,32 @@ if ! [[ `rpm -qa | grep expect` ]]; then
     sudo yum install -y expect
 fi
 if ! [[ `rpm -qa | grep xdg-utils` ]]; then
-    sudo yum install -y xdg-utils
+    sudo yum install -y xmlto
+    wget https://portland.freedesktop.org/download/xdg-utils-1.1.2.tar.gz
+    tar xzvf xdg-utils-1.1.2.tar.gz
+    cd xdg-utils-1.1.2
+    ./configure --prefix="/usr/local"
+    sudo make
+    sudo make install
+    cd ..
+    sudo rm -rf xdg-utils-1.1.2*
+else
+    currentver="$(xdg-open --version | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')"
+    requiredver="1.1.2"
+    if ! [[ "$(printf '%s\n' "$requiredver" "$currentver" | sort -V | head -n1)" = "$requiredver" ]]; then
+        sudo yum install -y xmlto
+        wget https://portland.freedesktop.org/download/xdg-utils-1.1.2.tar.gz
+        tar xzvf xdg-utils-1.1.2.tar.gz
+        cd xdg-utils-1.1.2
+        ./configure --prefix="/usr/local"
+        sudo make
+        sudo make install
+        cd ..
+	sudo rm -rf xdg-utils-1.1.2*
+    fi
 fi
 if ! [[ `rpm -qa | grep oidc-agent` ]]; then
-    sudo yum install -y http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
+    sudo yum install -y https://github.com/indigo-dc/oidc-agent/releases/download/v3.1.1/oidc-agent-3.1.1-1.x86_64.rpm
 fi
 if ! [[ `ls /etc/grid-security/certificates` ]]; then
     sudo cp ../ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo

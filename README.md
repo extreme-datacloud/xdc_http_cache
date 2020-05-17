@@ -28,6 +28,10 @@ docker-compose up -d
 ```
 Before doing this you have to follow the reference documentation in the Deployment and Administration section.
 In order to work you don't need to instantiate all the services. Depending on the needs one or more services can deployed.
+Recommended versions for Docker and docker-compose are (at least) the following:
+  - `Docker version 19.03.5`
+  - `docker-compose version 1.25.3`
+
 
 # Deployment and Administration
 

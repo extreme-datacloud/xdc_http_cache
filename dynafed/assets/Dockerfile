@@ -15,7 +15,7 @@ RUN cd /etc/yum.repos.d/ \
     && rm -f /etc/rsyslog.d/listen.conf \
     && mkdir /digicert
 
-RUN yum install -y http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
+RUN yum install -y https://github.com/indigo-dc/oidc-agent/releases/download/v3.1.1/oidc-agent-3.1.1-1.x86_64.rpm
 
 RUN yum install edg-mkgridmap php-fpm -y
 

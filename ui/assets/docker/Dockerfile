@@ -9,9 +9,8 @@ RUN yum install ca-policy-egi-core fetch-crl sharutils -y
 RUN yum install vim telnet screen expect xdg-utils xauth dbus-x11 firefox -y
 RUN \
   yum -y install redhat-lsb-core wget git tar && \
-  #yum -y update && \
   yum -y install yum-utils gfal2-all davix attr acl jq voms-clients-java  && \
-  yum -y install http://repo.indigo-datacloud.eu/repository/deep-hdc/production/1/centos7/x86_64/third-party/oidc-agent-3.1.1-1.x86_64.rpm
+  yum -y install https://github.com/indigo-dc/oidc-agent/releases/download/v3.1.1/oidc-agent-3.1.1-1.x86_64.rpm
 
 COPY assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
 COPY assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
