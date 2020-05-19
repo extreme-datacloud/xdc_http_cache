@@ -40,7 +40,6 @@ RUN chown -R storm:storm /home/storm/
 USER storm
 
 RUN chmod 400 /home/storm/.globus/userkey.pem && \
-    chmod 600 /home/storm/.globus/usercert.pem && \
-    /home/storm/scripts/set_xauth_list.sh
+    chmod 600 /home/storm/.globus/usercert.pem
 
-CMD /bin/bash
+CMD /home/storm/scripts/set_xauth_list.sh && /bin/bash

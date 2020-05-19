@@ -118,6 +118,8 @@ if [ -n $service ] ; then
 
         printf '\nPlease, register an IAM account for your user. Opening Firefox...\n'
         firefox https://$iam_hostname/
+        rm -rf ~/.oidc-agent/*
+        rm -rf ~/.config/oidc-agent/*
         printf '\nNow, register a token exchange client for your user. Starting oidc-agent...\n'
         printf '\n(Notice: You must enter IAM'"'"'s endpoint URL, i.e. https://'"$iam_hostname"'/, as Issuer when prompted)\n'
         source ../ui/assets/scripts/register_client.sh
@@ -365,6 +367,8 @@ if [ -n $service ] ; then
         
         printf '\nPlease, register an IAM account for Dynafed. Opening Firefox...\n'
         firefox https://$iam_hostname/
+        rm -rf ~/.oidc-agent/*
+        rm -rf ~/.config/oidc-agent/*
         printf '\nNow, register a token exchange client for Dynafed. Starting oidc-agent...\n'
         printf '\n(Notice: You must enter IAM'"'"'s endpoint URL, i.e. https://'"$iam_hostname"'/, as Issuer when prompted)\n'
         source ../dynafed/assets/register_client.sh
