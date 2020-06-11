@@ -2,7 +2,7 @@
 
 source /etc/profile.d/oidc-agent.sh
 
-export CLIENT=definitive-client
+export CLIENT=
 
 export SUBJECT_TOKEN=$(oidc-token $CLIENT)
 

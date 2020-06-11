@@ -393,6 +393,7 @@ if [ -n $service ] ; then
         sed -i 's/\(ENV CLIENT_SECRET=\)\(.*\)/\1'"$client_secret"'/g' ../dynafed/assets/Dockerfile
         sed -i 's/\(ENV CLIENT_PASSPHRASE=\)\(.*\)/\1'"$client_passphrase"'/g' ../dynafed/assets/Dockerfile
         sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../dynafed/assets/oidc_get_token.sh
+        sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../dynafed/assets/cronjob.sh
         sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../dynafed/assets/oidc_expect.sh
         sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../dynafed/assets/oidc_expect.sh
 
