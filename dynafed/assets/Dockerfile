@@ -1,4 +1,4 @@
-FROM ffornari/http-storage-demo-cnaf:dynafed_patched
+FROM extremedatacloud/xdc-http-cache-dynafed:latest
 
 ENV IAM_HOSTNAME=
 ENV CLIENT_ID=

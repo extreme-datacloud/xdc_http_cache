@@ -1,4 +1,4 @@
-FROM ffornari/http-storage-demo-cnaf:voms-aa
+FROM extremedatacloud/xdc-http-cache-vomsaa:latest
 
 RUN apt-get update -y && apt-get install -y ca-certificates curl nano && apt-get clean all
 

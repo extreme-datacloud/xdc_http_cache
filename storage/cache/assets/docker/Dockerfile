@@ -1,4 +1,4 @@
-FROM ffornari/http-storage-demo-cnaf:nginx_voms_centos7
+FROM extremedatacloud/xdc-http-cache-nginx:latest
 
 ENV IAM_HOSTNAME=
 ENV PATH="/usr/local/openresty/bin:${PATH}"
