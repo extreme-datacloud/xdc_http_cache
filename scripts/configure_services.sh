@@ -17,7 +17,7 @@ fi
 if ! [[ `rpm -qa | grep expect` ]]; then
     sudo yum install -y expect
 fi
-if ! [[ `rpm -qa | grep xdg-utils` ]]; then
+if ! [[ `rpm -qa | grep xdg-utils || which xdg-open` ]]; then
     sudo yum install -y xmlto
     wget https://portland.freedesktop.org/download/xdg-utils-1.1.2.tar.gz
     tar xzvf xdg-utils-1.1.2.tar.gz
@@ -45,15 +45,21 @@ fi
 if ! [[ `rpm -qa | grep oidc-agent` ]]; then
     sudo yum install -y https://github.com/indigo-dc/oidc-agent/releases/download/v3.1.1/oidc-agent-3.1.1-1.x86_64.rpm
 fi
-if ! [[ `ls /etc/grid-security/certificates` ]]; then
+if ! [[ `ls /etc/grid-security/certificates 2>/dev/null` ]]; then
     sudo cp ../ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
     sudo yum install -y ca-policy-egi-core fetch-crl sharutils
 fi
-if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem` ]]; then
+if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem 2>/dev/null` ]]; then
     sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
 fi
-if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem` ]]; then
+if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem 2>/dev/null` ]]; then
     sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+fi
+if ! [[ `ls /etc/grid-security/certificates/FullchainHostSectigo.pem 2>/dev/null` ]]; then
+    sudo cp ../ui/assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
+fi
+if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHostSectigo.pem 2>/dev/null` ]]; then
+    sudo cp ../ui/assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
 fi
 sudo update-ca-trust
 
@@ -232,12 +238,12 @@ if [ -n $service ] ; then
             printf '\nEnter StoRM-WebDAV hostname for cache n. '"$i"': '
             read -r storm_hostname
 
-            printf '\nEnter StoRM-WebDAV'"'"'s port for cache n. '"$i"': '
+            printf '\nEnter StoRM-WebDAV'"'"'s HTTPS port for cache n. '"$i"': '
             read -r storm_port
             while ! [[ $storm_port =~ $re && "$storm_port" -gt "$p_min" ]]
             do
               	printf '\nport not valid\n'
-                printf '\nEnter StoRM-WebDAV'"'"'s port for cache n. '"$i"': '
+                printf '\nEnter StoRM-WebDAV'"'"'s HTTPS port for cache n. '"$i"': '
                 read -r storm_port
             done
 
@@ -397,6 +403,44 @@ if [ -n $service ] ; then
         sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../dynafed/assets/oidc_expect.sh
         sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../dynafed/assets/oidc_expect.sh
 
+        p_min=1000
+
+        printf '\nEnter Dynafed'"'"'s HTTP port: '
+        read -r dynafed_port
+        while ! [[ $dynafed_port =~ $re && "$dynafed_port" -gt "$p_min" ]]
+        do
+            printf '\nport not valid\n'
+            printf '\nEnter Dynafed'"'"'s HTTP port: '
+            read -r dynafed_port
+        done
+
+        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/g2' ../dynafed/assets/Dockerfile  
+        sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/Dockerfile
+        sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/Dockerfile
+        sed -i 'H;1h;$!d;x; s/      - "/\x00/1' ../dynafed/docker-compose.yml  
+        sed -i 's/\(      - "\)\(.*\)/\1'"$dynafed_port"':80"/g' ../dynafed/docker-compose.yml
+        sed -i 's/\x00/      - "/g' ../dynafed/docker-compose.yml
+
+        printf '\nEnter Dynafed'"'"'s HTTPS port: '
+        read -r dynafed_port
+        while ! [[ $dynafed_port =~ $re && "$dynafed_port" -gt "$p_min" ]]
+        do
+            printf '\nport not valid\n'
+            printf '\nEnter Dynafed'"'"'s HTTPS port: '
+            read -r dynafed_port
+        done
+
+        sed -i 's/\(  && sed -i '"'"'s\/Listen 443 \/Listen\)\(.*\)/\1'" $dynafed_port"'\/g'"'"' \/etc\/httpd\/conf\/httpd.conf \\ /g' ../dynafed/assets/Dockerfile
+        sed -i 's/\(  && sed -i '"'"'s\/#OIDCRedirectURI https:\\\/\\\/www.example.com\\\/protected\\\/redirect_uri\/OIDCRedirectURI https:\\\/\\\/iam.local.io:\)\(.*\)/\1'"$dynafed_port"'\\\/myfed\\\/redirect_uri\/g'"'"' \\ /g' ../dynafed/assets/Dockerfile
+        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/1' ../dynafed/assets/Dockerfile  
+        sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/Dockerfile
+        sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/Dockerfile
+        sed -i 's/\(Listen\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/zlcgdm-ugr-dav.conf
+        sed -i 's/\(\<VirtualHost \*:\)\(.*\)/\1'"$dynafed_port"'\>/g' ../dynafed/assets/zlcgdm-ugr-dav.conf
+        sed -i 'H;1h;$!d;x; s/      - "/\x00/g2' ../dynafed/docker-compose.yml  
+        sed -i 's/\(      - "\)\(.*\)/\1'"$dynafed_port"':'"$dynafed_port"'"/' ../dynafed/docker-compose.yml
+        sed -i 's/\x00/      - "/g' ../dynafed/docker-compose.yml
+
         printf '\nHow many endpoints is Dynafed going to federate? '
         read -r num_endpoints
         re='^[0-9]+$'
@@ -496,6 +540,7 @@ locplugin.LOCAL-WEBDAV-%s.xlatepfx: /indigo-dc/ /\n\n' \
         if [ -f grid-mapfile ]; then
             cat grid-mapfile >> ../dynafed/assets/grid-mapfile
             printf '\ndynafed service successfully configured!\n'
+            printf '\nYou can contact dynafed at the following URL: https://%s:%s/myfed/indigo-dc\n' "$HOSTNAME" "$dynafed_port"
         else
             printf '\nWarning: ui service not yet configured, could not add user to grid-mapfile!\n'
         fi

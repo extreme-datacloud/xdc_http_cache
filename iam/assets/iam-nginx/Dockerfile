@@ -2,8 +2,8 @@ FROM nginx:latest
 COPY iam/assets/iam-nginx/wait-for-it.sh /
 RUN chmod +x /wait-for-it.sh
 RUN apt-get update && apt-get install -y ca-certificates curl nano && apt-get clean all
-COPY iam/assets/iam-nginx/FullchainHost.pem /usr/local/share/ca-certificates/FullchainHost.crt
-COPY iam/assets/iam-nginx/igi-test-ca.pem /usr/local/share/ca-certificates/igi-test-ca.crt
+COPY iam/assets/certs/digicert/FullchainHost.pem /usr/local/share/ca-certificates/FullchainHost.crt
+COPY iam/assets/certs/sectigo/FullchainHostSectigo.pem /usr/local/share/ca-certificates/FullchainHostSectigo.crt
 COPY iam/assets/iam-nginx/nginx.conf /etc/nginx/
 COPY iam/assets/iam-nginx/iam.conf /etc/nginx/conf.d/default.conf
 COPY certs/hostkey.pem /etc/ssl/private/

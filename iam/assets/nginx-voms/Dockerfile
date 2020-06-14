@@ -6,8 +6,10 @@ RUN yum install ca-policy-egi-core fetch-crl sharutils -y
 
 COPY iam/assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
 COPY iam/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
+COPY iam/assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
 COPY iam/assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/
 COPY iam/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+COPY iam/assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
 
 RUN update-ca-trust
 

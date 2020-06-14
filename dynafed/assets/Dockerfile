@@ -77,8 +77,10 @@ RUN chmod +x /etc/ugr/conf.d/ugrauth_gridmap.py
 COPY dynafed/assets/local_python.sh /etc/profile.d/local_python.sh
 COPY dynafed/assets/startup.sh /startup.sh
 COPY dynafed/assets/certs/FullchainHost.pem /etc/grid-security/certificates
+COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/grid-security/certificates
 COPY dynafed/assets/certs/Fullchain.pem /etc/grid-security/certificates/
 COPY dynafed/assets/certs/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
 COPY dynafed/assets/certs/Fullchain.pem /etc/pki/ca-trust/source/anchors/
 
 COPY dynafed/assets/cronjob.sh /cronjob.sh

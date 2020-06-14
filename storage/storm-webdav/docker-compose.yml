@@ -20,6 +20,7 @@ services:
       - ./assets/etc/storm/webdav/vo-mapfiles.d/:/vo-mapfiles.d:ro
       - ./assets/vomsdir:/vomsdir:ro
       - ./assets/certs/digicert:/digicert
+      - ./assets/certs/sectigo:/sectigo
       - webdav_hostcert:/etc/grid-security/storm-webdav
       - webdav_certs:/etc/grid-security/certificates
       - vomsdir:/etc/grid-security/vomsdir

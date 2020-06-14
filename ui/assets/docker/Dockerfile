@@ -14,13 +14,16 @@ RUN \
 
 COPY assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
 COPY assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
+COPY assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
 COPY assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/
 COPY assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+COPY assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
 COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/grid-security/certificates/
 COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/pki/ca-trust/source/anchors/
 COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/pki/ca-trust/source/anchors/
 COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/grid-security/certificates/
 COPY assets/certs/digicert /digicert
+COPY assets/certs/sectigo /sectigo
 COPY assets/vomsdir /etc/grid-security/vomsdir
 COPY assets/vomses /etc/vomses
 
@@ -30,6 +33,7 @@ RUN groupadd -g $UID storm
 RUN useradd -u $UID -g $UID -ms /bin/bash storm
 
 COPY assets/scripts/ /home/storm/scripts/
+RUN sed -i 's/..\/ui\/assets\/scripts\/oidc_expect.sh/.\/oidc_expect.sh/g' /home/storm/scripts/oidc_get_token.sh
 COPY assets/usercert/usercert.pem /home/storm/.globus/usercert.pem
 COPY assets/usercert/userkey.pem /home/storm/.globus/userkey.pem
 COPY assets/usercert/user.p12 /home/storm/usercred.p12
