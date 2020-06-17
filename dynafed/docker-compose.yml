@@ -6,27 +6,25 @@ services:
     dns_search: 127.0.0.11
     build:
       context: ../
-      dockerfile: dynafed/assets/Dockerfile
+      dockerfile: dynafed/assets/docker/Dockerfile
     environment:
       TZ: UTC
     volumes:
-      - ./assets/ssl.conf:/etc/httpd/conf.d/ssl.conf
-      - ./assets/httpd.conf:/etc/httpd/conf/httpd.conf
-      - ./assets/ugr.conf:/etc/ugr/ugr.conf
-      - ./assets/ugrdmlite.conf:/etc/ugr/ugrdmlite.conf
-      - ./assets/zlcgdm-ugr-dav.conf:/etc/httpd/conf.d/zlcgdm-ugr-dav.conf
-      - ./assets/endpoints.conf:/etc/ugr/conf.d/endpoints.conf
-      - ./assets/test_gridmapfile.py:/root/test_gridmapfile.py
-      - ./assets/accessfile:/etc/grid-security/accessfile
-      - ./assets/grid-mapfile:/etc/grid-security/grid-mapfile
+      - ./assets/conf.d/ssl.conf:/etc/httpd/conf.d/ssl.conf
+      - ./assets/conf.d/httpd.conf:/etc/httpd/conf/httpd.conf
+      - ./assets/conf.d/ugr.conf:/etc/ugr/ugr.conf
+      - ./assets/conf.d/ugrdmlite.conf:/etc/ugr/ugrdmlite.conf
+      - ./assets/conf.d/zlcgdm-ugr-dav.conf:/etc/httpd/conf.d/zlcgdm-ugr-dav.conf
+      - ./assets/conf.d/endpoints.conf:/etc/ugr/conf.d/endpoints.conf
+      - ./assets/scripts/test_gridmapfile.py:/root/test_gridmapfile.py
+      - ./assets/conf.d/accessfile:/etc/grid-security/accessfile
+      - ./assets/conf.d/grid-mapfile:/etc/grid-security/grid-mapfile
       - ./assets/vomsdir:/etc/grid-security/vomsdir
-      - ./assets/register_client.sh:/register_client.sh
-      - ./assets/oidc_get_token.sh:/oidc_get_token.sh
-      - ./assets/oidc_expect.sh:/oidc_expect.sh
+      - ./assets/scripts/register_client.sh:/register_client.sh
+      - ./assets/scripts/oidc_get_token.sh:/oidc_get_token.sh
+      - ./assets/scripts/oidc_expect.sh:/oidc_expect.sh
       - ./assets/oidc-agent/:/root/.oidc-agent/
-      - ./assets/replace_iam_ip.sh:/replace_iam_ip.sh
-      - ./assets/boost-x86_64.conf:/etc/ld.so.conf.d/boost-x86_64.conf
-      - ./assets/ugr-x86_64.conf:/etc/ld.so.conf.d/ugr-x86_64.conf
+      - ./assets/scripts/replace_iam_ip.sh:/replace_iam_ip.sh
     ports:
       - "10443:10443"
       - "1044:80"

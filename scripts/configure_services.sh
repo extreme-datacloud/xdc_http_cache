@@ -49,12 +49,6 @@ if ! [[ `ls /etc/grid-security/certificates 2>/dev/null` ]]; then
     sudo cp ../ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
     sudo yum install -y ca-policy-egi-core fetch-crl sharutils
 fi
-#if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem 2>/dev/null` ]]; then
-#    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
-#fi
-#if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem 2>/dev/null` ]]; then
-#    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-#fi
 for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do sudo cp $f /etc/pki/ca-trust/source/anchors/; done
 sudo update-ca-trust
 
@@ -81,12 +75,6 @@ if [ -n $service ] ; then
         else
             printf '\nError: could not find host cert, host DN not added to .lsc file!\n'
             exit 1
-        fi
-
-        if [ -f ../ui/assets/usercert/usercert.pem ]; then
-            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../iam/assets/certs/digicert/Fullchain.pem
-        else
-            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by IAM!\n'
         fi
 
         printf '\niam service successfully configured!\n' 
@@ -160,12 +148,6 @@ if [ -n $service ] ; then
 
         xauth list > ../ui/assets/scripts/xauth_list.log
         
-        if [ -f ../ui/assets/usercert/usercert.pem ]; then
-            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../ui/assets/certs/digicert/Fullchain.pem
-        else
-            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected!\n'
-        fi
-
         printf '\nui service successfully configured!\n'
         ;;
 
@@ -195,12 +177,6 @@ if [ -n $service ] ; then
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/cache/assets/docker/replace_iam_ip.sh
-
-        if [ -f ../ui/assets/usercert/usercert.pem ]; then
-            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../storage/cache/assets/certs/digicert/Fullchain.pem
-        else
-            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by cache!\n'
-        fi
 
         printf '\nHow many cache instances are you going to deploy on this host? '
         read -r num_endpoints
@@ -278,12 +254,6 @@ if [ -n $service ] ; then
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../storage/storm-webdav/assets/scripts/replace_iam_ip.sh
-
-        if [ -f ../ui/assets/usercert/usercert.pem ]; then
-            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../storage/storm-webdav/assets/certs/digicert/Fullchain.pem
-        else
-            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by StoRM-WebDAV!\n'
-        fi
 
         printf '\nHow many StoRM-WebDAV instances are you going to deploy on this host? '
         read -r num_endpoints
@@ -363,8 +333,8 @@ if [ -n $service ] ; then
             exit 1
         fi
 
-        sed -i 's/\(  ServerName\)\(.*\)/\1'" $HOSTNAME"'/g' ../dynafed/assets/zlcgdm-ugr-dav.conf 
-        sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../dynafed/assets/Dockerfile
+        sed -i 's/\(  ServerName\)\(.*\)/\1'" $HOSTNAME"'/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf 
+        sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../dynafed/assets/docker/Dockerfile
         
         printf '\nPlease, register an IAM account for Dynafed. Opening Firefox...\n'
         firefox https://$iam_hostname/
@@ -372,7 +342,7 @@ if [ -n $service ] ; then
         rm -rf ~/.config/oidc-agent/*
         printf '\nNow, register a token exchange client for Dynafed. Starting oidc-agent...\n'
         printf '\n(Notice: You must enter IAM'"'"'s endpoint URL, i.e. https://'"$iam_hostname"'/, as Issuer when prompted)\n'
-        source ../dynafed/assets/register_client.sh
+        source ../dynafed/assets/scripts/register_client.sh
         printf 'Finally, enter encryption Password for the last time: '
         read -rs client_passphrase
         client_name=$((ls -l ~/.oidc-agent/ 2>/dev/null | grep -v issuer.config | awk '{if(NR>1)print $9}') && (ls -l ~/.config/oidc-agent/ 2>/dev/null | grep -v issuer.config | awk '{if(NR>1)print $9}'))
@@ -390,13 +360,13 @@ if [ -n $service ] ; then
         rm -rf ~/.oidc-agent/*
         rm -rf ~/.config/oidc-agent/*
 
-        sed -i 's/\(ENV CLIENT_ID=\)\(.*\)/\1'"$client_id"'/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\(ENV CLIENT_SECRET=\)\(.*\)/\1'"$client_secret"'/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\(ENV CLIENT_PASSPHRASE=\)\(.*\)/\1'"$client_passphrase"'/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../dynafed/assets/oidc_get_token.sh
-        sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../dynafed/assets/cronjob.sh
-        sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../dynafed/assets/oidc_expect.sh
-        sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../dynafed/assets/oidc_expect.sh
+        sed -i 's/\(ENV CLIENT_ID=\)\(.*\)/\1'"$client_id"'/g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\(ENV CLIENT_SECRET=\)\(.*\)/\1'"$client_secret"'/g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\(ENV CLIENT_PASSPHRASE=\)\(.*\)/\1'"$client_passphrase"'/g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../dynafed/assets/scripts/oidc_get_token.sh
+        sed -i 's/\(export CLIENT=\)\(.*\)/\1'"$client_name"'/g' ../dynafed/assets/scripts/cronjob.sh
+        sed -i 's/\(set CLIENT {\)\(.*\)/\1'"$client_name}"'/g' ../dynafed/assets/scripts/oidc_expect.sh
+        sed -i 's/\(set PASSWORD {\)\(.*\)/\1'"$client_passphrase}"'/g' ../dynafed/assets/scripts/oidc_expect.sh
 
         p_min=1000
 
@@ -409,9 +379,9 @@ if [ -n $service ] ; then
             read -r dynafed_port
         done
 
-        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/g2' ../dynafed/assets/Dockerfile  
-        sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/Dockerfile
+        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/g2' ../dynafed/assets/docker/Dockerfile  
+        sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/docker/Dockerfile
         sed -i 'H;1h;$!d;x; s/      - "/\x00/1' ../dynafed/docker-compose.yml  
         sed -i 's/\(      - "\)\(.*\)/\1'"$dynafed_port"':80"/g' ../dynafed/docker-compose.yml
         sed -i 's/\x00/      - "/g' ../dynafed/docker-compose.yml
@@ -425,13 +395,13 @@ if [ -n $service ] ; then
             read -r dynafed_port
         done
 
-        sed -i 's/\(  && sed -i '"'"'s\/Listen 443 \/Listen\)\(.*\)/\1'" $dynafed_port"'\/g'"'"' \/etc\/httpd\/conf\/httpd.conf \\ /g' ../dynafed/assets/Dockerfile
-        sed -i 's/\(  && sed -i '"'"'s\/#OIDCRedirectURI https:\\\/\\\/www.example.com\\\/protected\\\/redirect_uri\/OIDCRedirectURI https:\\\/\\\/iam.local.io:\)\(.*\)/\1'"$dynafed_port"'\\\/myfed\\\/redirect_uri\/g'"'"' \\ /g' ../dynafed/assets/Dockerfile
-        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/1' ../dynafed/assets/Dockerfile  
-        sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/Dockerfile
-        sed -i 's/\(Listen\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/zlcgdm-ugr-dav.conf
-        sed -i 's/\(\<VirtualHost \*:\)\(.*\)/\1'"$dynafed_port"'\>/g' ../dynafed/assets/zlcgdm-ugr-dav.conf
+        sed -i 's/\(  && sed -i '"'"'s\/Listen 443 \/Listen\)\(.*\)/\1'" $dynafed_port"'\/g'"'"' \/etc\/httpd\/conf\/httpd.conf \\ /g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\(  && sed -i '"'"'s\/#OIDCRedirectURI https:\\\/\\\/www.example.com\\\/protected\\\/redirect_uri\/OIDCRedirectURI https:\\\/\\\/iam.local.io:\)\(.*\)/\1'"$dynafed_port"'\\\/myfed\\\/redirect_uri\/g'"'"' \\ /g' ../dynafed/assets/docker/Dockerfile
+        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/1' ../dynafed/assets/docker/Dockerfile  
+        sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/docker/Dockerfile
+        sed -i 's/\(Listen\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf
+        sed -i 's/\(\<VirtualHost \*:\)\(.*\)/\1'"$dynafed_port"'\>/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf
         sed -i 'H;1h;$!d;x; s/      - "/\x00/g2' ../dynafed/docker-compose.yml  
         sed -i 's/\(      - "\)\(.*\)/\1'"$dynafed_port"':'"$dynafed_port"'"/' ../dynafed/docker-compose.yml
         sed -i 's/\x00/      - "/g' ../dynafed/docker-compose.yml
@@ -499,7 +469,7 @@ if [ -n $service ] ; then
             printf '%s\n' "$i" >> cache_dns.log
         done
 
-        cp /dev/null ../dynafed/assets/endpoints.conf
+        cp /dev/null ../dynafed/assets/conf.d/endpoints.conf
 
         length=`expr "${#endpoint_urls[@]}" - 1`
 
@@ -520,20 +490,14 @@ locplugin.LOCAL-WEBDAV-%s.xlatepfx: /indigo-dc/ /\n\n' \
               "$endpoint_index" \
               "$endpoint_index" \
               "$endpoint_index" \
-              "$endpoint_index" >> ../dynafed/assets/endpoints.conf
+              "$endpoint_index" >> ../dynafed/assets/conf.d/endpoints.conf
         done
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
-        sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../dynafed/assets/replace_iam_ip.sh
+        sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../dynafed/assets/scripts/replace_iam_ip.sh
         
-        if [ -f ../ui/assets/usercert/usercert.pem ]; then
-            cat ../iam/assets/certs/digicert/DigiCertAssuredIDRootCA.crt ../iam/assets/certs/digicert/TERENAeSciencePersonalCA3.pem ../ui/assets/usercert/usercert.pem > ../dynafed/assets/certs/Fullchain.pem
-        else
-            printf '\nWarning: could not find x509 cert, user VOMS proxy will be rejected by DynaFed!\n'
-        fi
-
         if [ -f grid-mapfile ]; then
-            cat grid-mapfile >> ../dynafed/assets/grid-mapfile
+            cat grid-mapfile >> ../dynafed/assets/conf.d/grid-mapfile
             printf '\ndynafed service successfully configured!\n'
             printf '\nYou can contact dynafed at the following URL: https://%s:%s/myfed/indigo-dc\n' "$HOSTNAME" "$dynafed_port"
         else

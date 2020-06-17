@@ -2,9 +2,6 @@ FROM extremedatacloud/xdc-http-cache-vomsaa:latest
 
 RUN apt-get update -y && apt-get install -y ca-certificates curl nano && apt-get clean all
 
-#COPY iam/assets/certs/digicert/Fullchain.pem /usr/local/share/ca-certificates/Fullchain.crt
-#COPY iam/assets/certs/digicert/FullchainHost.pem /usr/local/share/ca-certificates/FullchainHost.crt
-#COPY iam/assets/certs/sectigo/FullchainHostSectigo.pem /usr/local/share/ca-certificates/FullchainHostSectigo.crt
 RUN for f in `find /usr/share/ca-certificates/mozilla/ -type f -name '*.crt'`; do cp $f /usr/local/share/ca-certificates/; done
 RUN update-ca-certificates && apt-get update -y && apt-get install ca-certificates-java -y
 

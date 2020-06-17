@@ -12,12 +12,6 @@ WORKDIR work/
 
 COPY certs/ /hostcert/
 COPY storage/cache/assets/vomsdir/ /vomsdir/
-#COPY storage/cache/assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
-#COPY storage/cache/assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
-#COPY storage/cache/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
-#COPY storage/cache/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-#COPY storage/cache/assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
-#COPY storage/cache/assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/
 
 RUN opm get zmartzone/lua-resty-openidc
 

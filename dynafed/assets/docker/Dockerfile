@@ -5,7 +5,7 @@ ENV CLIENT_ID=
 ENV CLIENT_SECRET=
 ENV CLIENT_PASSPHRASE=
 
-COPY dynafed/assets/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
+COPY dynafed/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
 RUN yum install ca-policy-egi-core fetch-crl -y
 
 RUN yum install \
@@ -24,9 +24,9 @@ RUN yum install edg-mkgridmap php-fpm -y
 
 COPY certs/hostcert.pem /digicert/
 COPY certs/hostkey.pem /digicert/
-COPY dynafed/assets/rsyslog.conf /etc/rsyslog.conf
-COPY dynafed/assets/boost-x86_64.conf /etc/ld.so.conf.d/boost-x86_64.conf
-COPY dynafed/assets/ugr-x86_64.conf /etc/ld.so.conf.d/ugr-x86_64.conf
+COPY dynafed/assets/conf.d/rsyslog.conf /etc/rsyslog.conf
+COPY dynafed/assets/conf.d/boost-x86_64.conf /etc/ld.so.conf.d/boost-x86_64.conf
+COPY dynafed/assets/conf.d/ugr-x86_64.conf /etc/ld.so.conf.d/ugr-x86_64.conf
 
 # do a bit of tuning
 # - disable the mod_dav module
@@ -73,21 +73,17 @@ RUN rm -rf /etc/httpd/conf.d/zgridsite.conf
 RUN rm -rf /etc/httpd/conf.d/zlcgdm-dav.conf
 RUN touch /var/log/ugr.log
 
-COPY dynafed/assets/ugrauth_gridmap.py /etc/ugr/conf.d/ugrauth_gridmap.py
+COPY dynafed/assets/scripts/ugrauth_gridmap.py /etc/ugr/conf.d/ugrauth_gridmap.py
 RUN chown apache:apache /etc/ugr/conf.d/ugrauth_gridmap.py
 RUN chmod +x /etc/ugr/conf.d/ugrauth_gridmap.py
 
-COPY dynafed/assets/local_python.sh /etc/profile.d/local_python.sh
-COPY dynafed/assets/startup.sh /startup.sh
-#COPY dynafed/assets/certs/FullchainHost.pem /etc/grid-security/certificates
-#COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/grid-security/certificates
-#COPY dynafed/assets/certs/Fullchain.pem /etc/grid-security/certificates/
-#COPY dynafed/assets/certs/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-#COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
-#COPY dynafed/assets/certs/Fullchain.pem /etc/pki/ca-trust/source/anchors/
+COPY dynafed/assets/scripts/local_python.sh /etc/profile.d/local_python.sh
+COPY dynafed/assets/scripts/startup.sh /startup.sh
+
 RUN for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do cp $f /etc/pki/ca-trust/source/anchors/; done
-COPY dynafed/assets/cronjob.sh /cronjob.sh
-COPY dynafed/assets/crontab /var/spool/cron/token_cronjob
+
+COPY dynafed/assets/scripts/cronjob.sh /cronjob.sh
+COPY dynafed/assets/conf.d/crontab /var/spool/cron/token_cronjob
 RUN chmod 0644 /var/spool/cron/token_cronjob && \
     crontab /var/spool/cron/token_cronjob && \
     update-ca-trust && ldconfig

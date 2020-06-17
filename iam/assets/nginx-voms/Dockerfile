@@ -4,13 +4,6 @@ EXPOSE 443
 COPY ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
 RUN yum install ca-policy-egi-core fetch-crl sharutils -y
 
-#COPY iam/assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
-#COPY iam/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
-#COPY iam/assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
-#COPY iam/assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/
-#COPY iam/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-#COPY iam/assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
-
 RUN for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do cp $f /etc/pki/ca-trust/source/anchors/; done
 RUN update-ca-trust
 
