@@ -12,18 +12,19 @@ RUN \
   yum -y install yum-utils gfal2-all davix attr acl jq voms-clients-java  && \
   yum -y install https://github.com/indigo-dc/oidc-agent/releases/download/v3.1.1/oidc-agent-3.1.1-1.x86_64.rpm
 
-COPY assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
-COPY assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
-COPY assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
-COPY assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/
-COPY assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-COPY assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
-COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/grid-security/certificates/
-COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/pki/ca-trust/source/anchors/
-COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/pki/ca-trust/source/anchors/
-COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/grid-security/certificates/
-COPY assets/certs/digicert /digicert
-COPY assets/certs/sectigo /sectigo
+#COPY assets/certs/digicert/Fullchain.pem /etc/grid-security/certificates/
+#COPY assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
+#COPY assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
+#COPY assets/certs/digicert/Fullchain.pem /etc/pki/ca-trust/source/anchors/
+#COPY assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+#COPY assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
+#COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/grid-security/certificates/
+#COPY assets/certs/digicert/TERENAeSciencePersonalCA3.pem /etc/pki/ca-trust/source/anchors/
+#COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/pki/ca-trust/source/anchors/
+#COPY assets/certs/digicert/TERENAPersonalCA3.crt /etc/grid-security/certificates/
+#COPY assets/certs/digicert /digicert
+#COPY assets/certs/sectigo /sectigo
+RUN for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do cp $f /etc/pki/ca-trust/source/anchors/; done
 COPY assets/vomsdir /etc/grid-security/vomsdir
 COPY assets/vomses /etc/vomses
 

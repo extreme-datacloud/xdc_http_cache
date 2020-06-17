@@ -5,6 +5,9 @@ ENV CLIENT_ID=
 ENV CLIENT_SECRET=
 ENV CLIENT_PASSPHRASE=
 
+COPY dynafed/assets/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
+RUN yum install ca-policy-egi-core fetch-crl -y
+
 RUN yum install \
 	mod_auth_openidc mod_ssl net-tools geolite2-city jq cronie telnet expect \
 	-y
@@ -76,13 +79,13 @@ RUN chmod +x /etc/ugr/conf.d/ugrauth_gridmap.py
 
 COPY dynafed/assets/local_python.sh /etc/profile.d/local_python.sh
 COPY dynafed/assets/startup.sh /startup.sh
-COPY dynafed/assets/certs/FullchainHost.pem /etc/grid-security/certificates
-COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/grid-security/certificates
-COPY dynafed/assets/certs/Fullchain.pem /etc/grid-security/certificates/
-COPY dynafed/assets/certs/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
-COPY dynafed/assets/certs/Fullchain.pem /etc/pki/ca-trust/source/anchors/
-
+#COPY dynafed/assets/certs/FullchainHost.pem /etc/grid-security/certificates
+#COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/grid-security/certificates
+#COPY dynafed/assets/certs/Fullchain.pem /etc/grid-security/certificates/
+#COPY dynafed/assets/certs/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+#COPY dynafed/assets/certs/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
+#COPY dynafed/assets/certs/Fullchain.pem /etc/pki/ca-trust/source/anchors/
+RUN for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do cp $f /etc/pki/ca-trust/source/anchors/; done
 COPY dynafed/assets/cronjob.sh /cronjob.sh
 COPY dynafed/assets/crontab /var/spool/cron/token_cronjob
 RUN chmod 0644 /var/spool/cron/token_cronjob && \

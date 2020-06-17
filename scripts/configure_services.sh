@@ -49,18 +49,13 @@ if ! [[ `ls /etc/grid-security/certificates 2>/dev/null` ]]; then
     sudo cp ../ui/assets/yum.repos.d/egi-ca.repo /etc/yum.repos.d/egi-ca.repo
     sudo yum install -y ca-policy-egi-core fetch-crl sharutils
 fi
-if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem 2>/dev/null` ]]; then
-    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
-fi
-if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem 2>/dev/null` ]]; then
-    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
-fi
-if ! [[ `ls /etc/grid-security/certificates/FullchainHostSectigo.pem 2>/dev/null` ]]; then
-    sudo cp ../ui/assets/certs/sectigo/FullchainHostSectigo.pem /etc/grid-security/certificates/
-fi
-if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHostSectigo.pem 2>/dev/null` ]]; then
-    sudo cp ../ui/assets/certs/sectigo/FullchainHostSectigo.pem /etc/pki/ca-trust/source/anchors/
-fi
+#if ! [[ `ls /etc/grid-security/certificates/FullchainHost.pem 2>/dev/null` ]]; then
+#    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/grid-security/certificates/
+#fi
+#if ! [[ `ls /etc/pki/ca-trust/source/anchors/FullchainHost.pem 2>/dev/null` ]]; then
+#    sudo cp ../ui/assets/certs/digicert/FullchainHost.pem /etc/pki/ca-trust/source/anchors/
+#fi
+for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do sudo cp $f /etc/pki/ca-trust/source/anchors/; done
 sudo update-ca-trust
 
 printf 'Enter the service to be configured (please, follow the order) [ iam | ui | cache | dynafed | storm-webdav ]: '

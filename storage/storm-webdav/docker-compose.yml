@@ -5,6 +5,7 @@ volumes:
   mapfilesconfig:
   webdav_hostcert:
   webdav_certs:
+  webdav_pki:
   vomsdir:
   storage:
 
@@ -19,10 +20,11 @@ services:
       - ./assets/etc/storm/webdav/sa.d/:/sa.d:ro
       - ./assets/etc/storm/webdav/vo-mapfiles.d/:/vo-mapfiles.d:ro
       - ./assets/vomsdir:/vomsdir:ro
-      - ./assets/certs/digicert:/digicert
-      - ./assets/certs/sectigo:/sectigo
+      #- ./assets/certs/digicert:/digicert
+      #- ./assets/certs/sectigo:/sectigo
       - webdav_hostcert:/etc/grid-security/storm-webdav
       - webdav_certs:/etc/grid-security/certificates
+      - webdav_pki:/etc/pki
       - vomsdir:/etc/grid-security/vomsdir
       - saconfig:/etc/storm/webdav/sa.d
       - mapfilesconfig:/etc/storm/webdav/vo-mapfiles.d
@@ -32,6 +34,7 @@ services:
     volumes:
       - webdav_hostcert:/etc/grid-security/storm-webdav
       - webdav_certs:/etc/grid-security/certificates
+      - webdav_pki:/etc/pki
       - vomsdir:/etc/grid-security/vomsdir
       - saconfig:/etc/storm/webdav/sa.d
       - mapfilesconfig:/etc/storm/webdav/vo-mapfiles.d
@@ -60,6 +63,7 @@ services:
       - ./assets/etc/storm/webdav/config:/etc/storm/webdav/config:ro
       - ./assets/scripts/replace_iam_ip.sh:/home/storm/replace_iam_ip.sh
       - webdav_certs:/etc/grid-security/certificates
+      - webdav_pki:/etc/pki
       - webdav_hostcert:/etc/grid-security/storm-webdav
       - saconfig:/etc/storm/webdav/sa.d
       - mapfilesconfig:/etc/storm/webdav/vo-mapfiles.d
