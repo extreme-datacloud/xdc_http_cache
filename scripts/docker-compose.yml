@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  cs:
+    build:
+      context: .
+      dockerfile: assets/docker/Dockerfile
+    image: configure_services
+    hostname: ${HOSTNAME}
+    networks:
+      default:
+        aliases:
+          - cs.example

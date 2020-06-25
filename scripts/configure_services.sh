@@ -1,5 +1,13 @@
 #!/bin/bash
-
+if ! [[ `rpm -qa | grep epel-release` ]]; then
+    sudo yum install -y epel-release
+fi
+if ! [[ `rpm -qa | grep which` ]]; then
+    sudo yum install -y which
+fi
+if ! [[ `rpm -qa | grep wget` ]]; then
+    sudo yum install -y wget
+fi
 if ! [[ `rpm -qa | grep firefox` ]]; then
     sudo yum install -y mesa-libGL
     sudo yum install -y dbus-x11    
@@ -78,6 +86,9 @@ if [ -n $service ] ; then
         fi
 
         printf '\niam service successfully configured!\n' 
+        printf '\nNow, before continuing, you need to start the iam service.\n' 
+        printf '\nPlease, follow the instructions reported at "xdc_http_cache/iam/README.md".\n' 
+        printf '\nIf you are in the CentOS7 Docker container, please exit, start iam and get\nback to the container running "connect_configuration_container.sh" again.\n' 
         ;;
 
       ui)
