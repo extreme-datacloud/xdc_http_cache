@@ -36,9 +36,9 @@ Recommended versions for Docker and docker-compose are (at least) the following:
 
 # Deployment and Administration
 
-* [ui](ui/README.md)
-* [iam](iam/README.md)
-* [Storm WebDAV](storage/storage-webdav/README.md)
-* [nginx cache](storage/cache/README.md)
-* [dynafed](dynafed/README.md)
+* [UI](ui/README.md)
+* [IAM](iam/README.md)
+* [StoRM WebDAV](storage/storage-webdav/README.md)
+* [NGINX Cache](storage/cache/README.md)
+* [Dynafed](dynafed/README.md)
 
