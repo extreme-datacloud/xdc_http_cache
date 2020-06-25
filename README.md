@@ -12,7 +12,8 @@ The service deployed consist of :
   - federation server
 
 Each service must be properly configured moving to `xdc_http_cache/scripts`, running `configure_services.sh`, selecting the desired service and following the instructions provided by the script.
-Please notice that `configure_services.sh` is developed for CentOS7 and requires to be run by a user with `sudo` privileges. If your OS is not CentOS7, you can run the script `connect_configuration_container.sh`:  this script will start a CentOS7 Docker container with this GitHub repository mounted in it; just move to `/xdc_http_cache/scripts` and run `configure_services.sh`, then exit when the configuration is completed.
+Please notice that `configure_services.sh` is developed for CentOS7 and requires to be run by a user with `sudo` privileges. If your OS is not CentOS7, you can run the script `connect_configuration_container.sh`:  
+this script will start a CentOS7 Docker container with this GitHub repository mounted in it; just move to `/xdc_http_cache/scripts` and run `configure_services.sh`, then exit when the configuration is completed.
 ## Repository structure
 The repository is splitted in folders with at least one service setup docker-compose.yml file:
 
