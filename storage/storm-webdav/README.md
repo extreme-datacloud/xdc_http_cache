@@ -5,7 +5,7 @@ If you want to modify the initial content of the StoRM WebDAV storage area, you 
 `#------EDIT HERE TO CHANGE STORAGE AREA INITIAL CONTENT------#`  
 `...`  
 `#----------------------STOP EDITING--------------------------#`.  
-Fine tuning on the StoRM WebDAV service configuration can be done modifying the file `xdc_http_cache/storage/storm-webdav/assets/etc/sysconfig/storm-webdav`. See [StoRM WebDAV installation & operation guide](doc/storm-webdav-guide.md) for details.
+Fine tuning on the StoRM WebDAV service configuration can be done modifying the file `xdc_http_cache/storage/storm-webdav/assets/etc/sysconfig/storm-webdav`. See [StoRM WebDAV installation & operation guide](doc/storm-webdav-guide.md) for details.  
 To setup StoRM WebDAV, you must go to `xdc_http_cache/scripts`, run the script `configure_services.sh` selecting storm-webdav service, and follow the instructions provided by the script.
 After configuration, the StoRM WebDAV service can be deployed moving to `xdc_http_cache/storage/storm_webdav` and executing the following commands:
 ```
