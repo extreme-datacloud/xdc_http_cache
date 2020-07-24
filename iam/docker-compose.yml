@@ -13,7 +13,7 @@ services:
 
   db:
     container_name: db
-    image: mariadb:latest
+    image: mariadb:10.2-bionic
     command: --max_allowed_packet=256M
     command: --log_warnings=1
     environment:
