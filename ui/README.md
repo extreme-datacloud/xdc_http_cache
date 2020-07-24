@@ -8,7 +8,7 @@ Required files are :
   - user.p12
 
 The .p12 certificate has to be imported in the browser, allowing the user to link the x509 certificate to his IAM account. 
-Notice that the certificate must be issued by [TERENA eScience Personal CA 3](https://www.digicert.com/digicert-root-community-certificates.htm) for the services to work.
+Notice that the certificate must be issued by [TERENA eScience Personal CA 3](https://www.digicert.com/digicert-root-community-certificates.htm) or [GEANT eScience Personal CA 4](https://crt.sh/?caid=160134) for the services to work.
 The configuration files for the VO to be configured should be provided under the `vomses` and `vomsdir` folders. These folders contain reference example files, properly configurable by running `xdc_http_cache/scripts/configure_services.sh`.
 Since you have to open a browser from inside the docker container (required for IAM account or token exchange client registration with `oidc-agent`), in order to start the ui service just run `xdc_http_cache/ui/connect_ui.sh`:
 ```
