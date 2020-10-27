@@ -10,7 +10,7 @@ if ! [[ `rpm -qa | grep wget` ]]; then
 fi
 if ! [[ `rpm -qa | grep firefox` ]]; then
     sudo yum install -y mesa-libGL
-    sudo yum install -y dbus-x11    
+    sudo yum install -y dbus-x11
     sudo yum install -y firefox
 fi
 if ! [[ `rpm -qa | grep bind-utils` ]]; then
@@ -65,9 +65,9 @@ read -r service
 if [ -n $service ] ; then
     case $service in
       iam)
-        sed -i 's/\(  server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../iam/assets/iam-nginx/iam.conf 
+        sed -i 's/\(  server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../iam/assets/iam-nginx/iam.conf
         sed -i 's/\(  server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../iam/assets/nginx-voms/conf.d/voms-ng.conf
-        sed -i 's/\(    host:\)\(.*\)/\1'" $HOSTNAME"'/g' ../iam/assets/etc/vomsng/application.yml 
+        sed -i 's/\(    host:\)\(.*\)/\1'" $HOSTNAME"'/g' ../iam/assets/etc/vomsng/application.yml
 
         lsc_file=$(ls ../iam/assets/vomsdir/indigo-dc)
         lsc_file=${lsc_file%".lsc"}
@@ -85,10 +85,10 @@ if [ -n $service ] ; then
             exit 1
         fi
 
-        printf '\niam service successfully configured!\n' 
-        printf '\nNow, before continuing, you need to start the iam service.\n' 
-        printf '\nPlease, follow the instructions reported at "xdc_http_cache/iam/README.md".\n' 
-        printf '\nIf you are in the CentOS7 Docker container, please exit, start iam and get\nback to the container running "connect_configuration_container.sh" again.\n' 
+        printf '\niam service successfully configured!\n'
+        printf '\nNow, before continuing, you need to start the iam service.\n'
+        printf '\nPlease, follow the instructions reported at "xdc_http_cache/iam/README.md".\n'
+        printf '\nIf you are in the CentOS7 Docker container, please exit, start iam and get\nback to the container running "connect_configuration_container.sh" again.\n'
         ;;
 
       ui)
@@ -139,7 +139,7 @@ if [ -n $service ] ; then
         printf '\n'
         source ../ui/assets/scripts/oidc_get_token.sh
         source ../ui/assets/scripts/get_userinfo.sh
-      
+
         if [ -f grid-mapfile ]; then
             cp /dev/null grid-mapfile
         else
@@ -158,7 +158,7 @@ if [ -n $service ] ; then
         rm -rf ~/.config/oidc-agent/*
 
         xauth list > ../ui/assets/scripts/xauth_list.log
-        
+
         printf '\nui service successfully configured!\n'
         ;;
 
@@ -182,7 +182,7 @@ if [ -n $service ] ; then
        	    exit 1
         fi
 
-        sed -i 's/\(        server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../storage/cache/assets/docker/nginx.conf 
+        sed -i 's/\(        server_name\)\(.*\)/\1'" $HOSTNAME"';/g' ../storage/cache/assets/docker/nginx.conf
         sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../storage/cache/assets/docker/Dockerfile
         sed -i 's/\(discovery = "https:\/\/\)\(.*\)/\1'"$iam_hostname"'\/.well-known\/openid-configuration",/g' ../storage/cache/assets/docker/nginx.conf
 
@@ -231,7 +231,7 @@ if [ -n $service ] ; then
 
             sed -i 's/\(ngx.var.proxy = '"'"'\)\(.*\)/\1'"$storm_hostname"':'"$storm_port"''"'"';/g' ../storage/cache_"$i"/assets/docker/nginx.conf
             find ../storage/cache_"$i" -type f -exec sed -i -e 's/cache\//cache_'"$i"'\//g' {} \;
-            
+
         done
 
         printf '\ncache service successfully configured!\n'
@@ -246,7 +246,7 @@ if [ -n $service ] ; then
 
         if ! [ "$iam_hostname" = "$lsc_file" ]; then
             mv ../storage/storm-webdav/assets/vomsdir/indigo-dc/*.lsc ../storage/storm-webdav/assets/vomsdir/indigo-dc/"$iam_hostname".lsc
-        fi        
+        fi
 
         if [ -f ../certs/hostcert.pem ]; then
             HOST_DN=$(openssl x509 -in ../certs/hostcert.pem -noout -subject | awk 'sub("^" $1 FS, _)')
@@ -344,9 +344,9 @@ if [ -n $service ] ; then
             exit 1
         fi
 
-        sed -i 's/\(  ServerName\)\(.*\)/\1'" $HOSTNAME"'/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf 
+        sed -i 's/\(  ServerName\)\(.*\)/\1'" $HOSTNAME"'/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf
         sed -i 's/\(ENV IAM_HOSTNAME=\)\(.*\)/\1'"$iam_hostname"'/g' ../dynafed/assets/docker/Dockerfile
-        
+
         printf '\nPlease, register an IAM account for Dynafed. Opening Firefox...\n'
         firefox https://$iam_hostname/
         rm -rf ~/.oidc-agent/*
@@ -390,10 +390,10 @@ if [ -n $service ] ; then
             read -r dynafed_port
         done
 
-        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/g2' ../dynafed/assets/docker/Dockerfile  
+        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/g2' ../dynafed/assets/docker/Dockerfile
         sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/docker/Dockerfile
         sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/docker/Dockerfile
-        sed -i 'H;1h;$!d;x; s/      - "/\x00/1' ../dynafed/docker-compose.yml  
+        sed -i 'H;1h;$!d;x; s/      - "/\x00/1' ../dynafed/docker-compose.yml
         sed -i 's/\(      - "\)\(.*\)/\1'"$dynafed_port"':80"/g' ../dynafed/docker-compose.yml
         sed -i 's/\x00/      - "/g' ../dynafed/docker-compose.yml
 
@@ -408,12 +408,12 @@ if [ -n $service ] ; then
 
         sed -i 's/\(  && sed -i '"'"'s\/Listen 443 \/Listen\)\(.*\)/\1'" $dynafed_port"'\/g'"'"' \/etc\/httpd\/conf\/httpd.conf \\ /g' ../dynafed/assets/docker/Dockerfile
         sed -i 's/\(  && sed -i '"'"'s\/#OIDCRedirectURI https:\\\/\\\/www.example.com\\\/protected\\\/redirect_uri\/OIDCRedirectURI https:\\\/\\\/iam.local.io:\)\(.*\)/\1'"$dynafed_port"'\\\/myfed\\\/redirect_uri\/g'"'"' \\ /g' ../dynafed/assets/docker/Dockerfile
-        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/1' ../dynafed/assets/docker/Dockerfile  
+        sed -i 'H;1h;$!d;x; s/\<EXPOSE\>/\x00/1' ../dynafed/assets/docker/Dockerfile
         sed -i 's/\(EXPOSE\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/docker/Dockerfile
         sed -i 's/\x00/EXPOSE/g' ../dynafed/assets/docker/Dockerfile
         sed -i 's/\(Listen\)\(.*\)/\1'" $dynafed_port"'/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf
         sed -i 's/\(\<VirtualHost \*:\)\(.*\)/\1'"$dynafed_port"'\>/g' ../dynafed/assets/conf.d/zlcgdm-ugr-dav.conf
-        sed -i 'H;1h;$!d;x; s/      - "/\x00/g2' ../dynafed/docker-compose.yml  
+        sed -i 'H;1h;$!d;x; s/      - "/\x00/g2' ../dynafed/docker-compose.yml
         sed -i 's/\(      - "\)\(.*\)/\1'"$dynafed_port"':'"$dynafed_port"'"/' ../dynafed/docker-compose.yml
         sed -i 's/\x00/      - "/g' ../dynafed/docker-compose.yml
 
@@ -458,7 +458,7 @@ if [ -n $service ] ; then
                 echo "$DN_CONTENT" > "dn_content"
             done
 
-            endpoint_dns+=("$dn")    
+            endpoint_dns+=("$dn")
         done
 
         rm -f dn_fields
@@ -473,7 +473,7 @@ if [ -n $service ] ; then
         if [ -f cache_dns.log ]; then
             cp /dev/null cache_dns.log
         else
-            touch cache_dns.log            
+            touch cache_dns.log
         fi
         for i in "${dns_unique[@]}"
         do
@@ -506,7 +506,7 @@ locplugin.LOCAL-WEBDAV-%s.xlatepfx: /indigo-dc/ /\n\n' \
 
         iam_ip_addr=$(host $iam_hostname | grep -oE '\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}\b')
         sed -i 's/\(newIP=\)\(.*\)/\1'"$iam_ip_addr"'/g' ../dynafed/assets/scripts/replace_iam_ip.sh
-        
+
         if [ -f grid-mapfile ]; then
             cat grid-mapfile >> ../dynafed/assets/conf.d/grid-mapfile
             printf '\ndynafed service successfully configured!\n'
