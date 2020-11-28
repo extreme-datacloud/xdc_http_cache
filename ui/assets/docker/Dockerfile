@@ -32,17 +32,15 @@ RUN useradd -u $UID -g $UID -ms /bin/bash storm
 
 COPY assets/scripts/ /home/storm/scripts/
 RUN sed -i 's/..\/ui\/assets\/scripts\/oidc_expect.sh/.\/oidc_expect.sh/g' /home/storm/scripts/oidc_get_token.sh
-COPY assets/usercert/usercert.pem /home/storm/.globus/usercert.pem
-COPY assets/usercert/userkey.pem /home/storm/.globus/userkey.pem
 COPY assets/usercert/user.p12 /home/storm/usercred.p12
+COPY assets/usercert/user.p12 /home/storm/.globus/usercred.p12
 COPY assets/oidc-agent/ /home/storm/.oidc-agent/
 
 RUN chown -R storm:storm /home/storm/
 
 USER storm
 
-RUN chmod 400 /home/storm/.globus/userkey.pem && \
-    chmod 600 /home/storm/.globus/usercert.pem && \
+RUN chmod 600 /home/storm/.globus/usercred.p12 && \
     chmod 600 /home/storm/usercred.p12
 
 CMD /home/storm/scripts/set_xauth_list.sh && /bin/bash
