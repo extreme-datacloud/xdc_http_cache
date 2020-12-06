@@ -1,6 +1,6 @@
 FROM centos:7
 
-ENV UID=    
+ENV UID=
 
 RUN yum install epel-release -y
 
@@ -32,11 +32,15 @@ RUN useradd -u $UID -g $UID -ms /bin/bash storm
 
 COPY assets/scripts/ /home/storm/scripts/
 RUN sed -i 's/..\/ui\/assets\/scripts\/oidc_expect.sh/.\/oidc_expect.sh/g' /home/storm/scripts/oidc_get_token.sh
-COPY assets/usercert/user.p12 /home/storm/usercred.p12
-COPY assets/usercert/user.p12 /home/storm/.globus/usercred.p12
+COPY assets/usercert/usercred.p12 /home/storm/usercred.p12
+COPY assets/usercert/usercred.p12 /home/storm/.globus/usercred.p12
 COPY assets/oidc-agent/ /home/storm/.oidc-agent/
 
 RUN chown -R storm:storm /home/storm/
+
+COPY assets/scripts/voms-proxy-init_overload.sh /
+
+RUN /voms-proxy-init_overload.sh
 
 USER storm
 

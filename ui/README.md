@@ -5,7 +5,7 @@ In order for VOMS authentication to work, the user x509 certificate and the corr
 Required files are :
   - usercert.pem
   - userkey.pem
-  - user.p12
+  - usercred.p12
 
 The .p12 certificate has to be imported in the browser, allowing the user to link the x509 certificate to his IAM account. 
 Notice that the certificate must be issued by [TERENA eScience Personal CA 3](https://www.digicert.com/digicert-root-community-certificates.htm) or [GEANT eScience Personal CA 4](https://crt.sh/?caid=160134) for the services to work.
@@ -25,7 +25,7 @@ export CLIENT=<registered client>
 oidc-add $CLIENT
 export SUBJECT_TOKEN=$(oidc-token $CLIENT)
 ```
-In order to request a token a client must be registered in the selected IAM (the OIDC provider choosen for this deployment). For this we invite to refer  to the documentation:
+In order to request a token a client must be registered in the selected IAM (the OIDC provider choosen for this deployment). For this we invite to refer to the documentation:
 [IAM documentation](https://indigo-iam.github.io/docs/v/current/)
 
 With the VOMS proxy or the token then HTTP requests can be be made using `curl` or `davix`. A few usage examples is reported:
