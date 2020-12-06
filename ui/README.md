@@ -2,7 +2,7 @@
 The user interface container provides the utilities to create a VOMS proxy (voms-clients-java) or request a token (oidc-agent).
 Service configuration can be done moving to `xdc_http_cache/scripts`, running `configure_services.sh`, selecting ui and following the instructions provided by the script.
 In order for VOMS authentication to work, the user .p12 certificate must be put in `xdc_http_cache/ui/assets/usercert`.
-Required files is:
+Required file is:
   - usercred.p12
 
 The .p12 certificate has to be imported in the browser, allowing the user to link the x509 certificate to his IAM account. 
