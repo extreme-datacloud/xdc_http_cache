@@ -4,6 +4,7 @@ ENV IAM_HOSTNAME=
 
 USER root
 
+RUN yum-config-manager --disable storm-nightly-centos7
 RUN yum install -y java-1.8.0-openjdk-devel
 
 COPY storage/storm-webdav/assets/etc/sysconfig/storm-webdav /etc/sysconfig/storm-webdav
