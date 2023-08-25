@@ -1,0 +1,12 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Falabella
+    given-names: Antonio
+    orcid: https://orcid.org/0000-0001-7581-5245
+  - family-names: Fornari
+    given-names: Federico
+    orcid: https://orcid.org/0000-0003-2979-6738
+title: extreme-datacloud/xdc_http_cache: Updated release
+version: v2.0.0
+date-released: 2023-08-25
