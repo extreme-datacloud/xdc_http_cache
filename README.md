@@ -1,4 +1,5 @@
 # xdc_http_cache - Distributed system of HTTP-based storage
+[![DOI](https://zenodo.org/badge/237452167.svg)](https://zenodo.org/badge/latestdoi/237452167)
 
 This project includes a playground for a demonstrator of a distributed system of storage, comprising storage elements, caches and redirectors, communicating via HTTPS.
 
